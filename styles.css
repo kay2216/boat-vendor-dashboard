@@ -1,0 +1,294 @@
+:root{--bg:#f6f8fb;--card:#fff;--text:#172033;--muted:#667085;--border:#dfe3ea;--accent:#1f4e78;--soft:#eaf1f7;--danger:#b42318}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
+.wrap{max-width:1320px;margin:auto;padding:20px}
+h1{margin:0}.sub{color:var(--muted);margin:6px 0 18px}
+.metrics,.grid{display:grid;gap:12px}.metrics{grid-template-columns:repeat(4,1fr)}.grid{grid-template-columns:repeat(2,1fr);margin-top:16px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px}
+.metric b{display:block;font-size:28px;margin-top:5px}
+.controls{display:grid;grid-template-columns:2fr repeat(10,minmax(120px,1fr)) auto;gap:10px;align-items:end;margin-top:16px}
+label{font-size:13px;color:var(--muted);display:block}
+input,select,textarea,button{width:100%;padding:10px;border:1px solid var(--border);border-radius:10px;font-size:14px;background:#fff}
+textarea{min-height:90px;resize:vertical}button{cursor:pointer}.primary{background:var(--accent);color:#fff;border-color:var(--accent)}.danger{color:var(--danger)}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.toolbar>*{width:auto}
+.formgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.formgrid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.form-field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.form-field input,.form-field select,.form-field textarea{margin:0}
+.span-2{grid-column:span 2}.span-3{grid-column:span 3}
+.vendor-top{display:flex;gap:10px;align-items:flex-start}
+.photo-carousel{width:132px;flex:none}.photo{width:132px;height:98px;border-radius:11px;background:var(--soft);display:flex;align-items:center;justify-content:center;font-weight:bold;color:var(--accent);overflow:hidden}
+.photo img{width:100%;height:100%;object-fit:cover;display:block}
+.photo-nav{display:flex;justify-content:space-between;align-items:center;margin-top:6px;gap:6px}.photo-nav button{width:34px;height:30px;padding:0;font-size:18px}.photo-count{font-size:12px;color:var(--muted);min-width:45px;text-align:center}
+.yacht-picker{margin-top:8px}.yacht-picker select{font-weight:600}
+.price-main{margin-top:7px;font-size:18px;font-weight:700;color:var(--accent)}.price-missing{margin-top:7px;font-size:13px;color:var(--muted)}
+.badge{display:inline-block;background:var(--soft);color:var(--accent);border-radius:999px;padding:5px 8px;font-size:12px;margin:6px 5px 0 0}
+.vendor-meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:5px}
+.vendor-category{display:inline-block;border-radius:999px;padding:5px 9px;font-size:12px;font-weight:700;background:var(--soft);color:var(--accent)}
+.vendor-category.reliable{background:#e8f5e9;color:#256b2b}
+.vendor-category.lazy{background:#fff4db;color:#8a6214}
+.vendor-category.top-guy{background:#e7f0ff;color:#184f9c}
+.vendor-category.expensive{background:#f8e8ef;color:#8f3157}
+
+.vendor-order{font-size:12px;color:var(--muted);font-weight:600}
+.overall-behavior{display:inline-flex;align-items:center;border-radius:999px;padding:5px 9px;font-size:12px;font-weight:800;background:#eef0f3;color:#586174}
+.overall-behavior.top-rated{background:#e7f0ff;color:#184f9c}
+.overall-behavior.good{background:#e8f5e9;color:#256b2b}
+.overall-behavior.average{background:#fff4db;color:#8a6214}
+.overall-behavior.poor{background:#fdeedc;color:#995117}
+.overall-behavior.problem{background:#fdecec;color:#a22a20}
+.overall-behavior.not-rated{background:#eef0f3;color:#586174}
+.vendor-card{position:relative;transition:border-color .18s ease,box-shadow .18s ease}
+.vendor-card.editing{grid-column:1/-1;border-color:#84a4c1;box-shadow:0 14px 34px rgba(31,78,120,.12)}
+.vendor-card.editing>.editor-shell{margin:14px 0 4px;overflow:visible;border-color:#84a4c1}
+.vendor-card.editing>.editor-shell .editor-header{border-radius:14px 14px 0 0}
+.vendor-card.editing>.editor-shell .editor-header{position:sticky;top:0;z-index:8;box-shadow:0 5px 12px rgba(31,78,120,.08)}
+.vendor-card.editing .editVendor:disabled{opacity:.65;cursor:default}
+#editorHome:empty{display:none}
+.yacht-website-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px;padding:9px 10px;border:1px solid var(--border);border-radius:10px;background:#fbfcfe}
+.yacht-website-row span{font-size:12px;color:var(--muted);font-weight:700}
+.yacht-website-row a{color:var(--accent);font-size:13px;font-weight:700;text-decoration:none;overflow-wrap:anywhere}
+.yacht-website-row a:hover{text-decoration:underline}
+.inline-save-banner{margin:10px 0 0;padding:9px 11px;border-radius:10px;background:#e8f5e9;color:#256b2b;font-size:13px;font-weight:800}
+.sms-status{margin-top:10px;padding:10px 12px;border:1px solid #b8d2bc;border-radius:10px;background:#eef8ef;color:#256b2b;font-size:13px;font-weight:700;line-height:1.4}
+.sms-status.error{border-color:#efb3b3;background:#fff4f4;color:#a22a20}
+.sms-status.info{border-color:#b8cadc;background:#f1f6fb;color:#1f4e78}
+.sms-help{margin-top:8px;font-size:12px;color:var(--muted);line-height:1.45}
+.app-error-banner{margin:0 0 16px;padding:12px 14px;border:1px solid #efb3b3;border-radius:12px;background:#fff4f4;color:#8f1d1d;font-size:13px;font-weight:700;line-height:1.45}
+.app-error-banner button{width:auto;margin-left:10px;padding:5px 9px}
+.textOwner{font-weight:700}
+.reliability-card{margin-top:12px;padding:12px;border:1px solid var(--border);border-radius:13px;background:#fbfcfe}
+.reliability-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap}
+.reliability-title{font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.reliability-badge{display:inline-flex;align-items:center;border-radius:999px;padding:6px 10px;font-size:12px;font-weight:800;background:#eef0f3;color:#586174}
+.reliability-badge.responsive{background:#e8f5e9;color:#256b2b}
+.reliability-badge.slow{background:#fff4db;color:#8a6214}
+.reliability-badge.not-reliable{background:#fdecec;color:#a22a20}
+.reliability-badge.not-rated{background:#eef0f3;color:#586174}
+.score-line{display:flex;align-items:center;gap:7px;margin-top:7px;font-size:12px;color:var(--muted)}
+.score-dots{display:inline-flex;gap:4px}.score-dot{width:9px;height:9px;border-radius:50%;background:#d6dbe3}.score-dot.active{background:var(--accent)}
+.booking-stat{min-width:105px;text-align:right}.booking-stat strong{display:block;font-size:23px;color:var(--accent)}.booking-stat span{font-size:11px;color:var(--muted)}
+.reliability-details{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px;font-size:12px}
+.reliability-details>div{padding:8px;border-radius:9px;background:var(--card);border:1px solid var(--border)}
+.behavior-chip{display:inline-block;border-radius:999px;padding:3px 7px;background:var(--soft);color:var(--accent);font-size:11px;font-weight:700;margin:2px 3px 2px 0}
+.booking-list{display:grid;gap:9px;margin-top:12px}.booking-row{border:1px solid var(--border);border-radius:11px;padding:11px;background:var(--card)}
+.booking-row-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.booking-row-title{font-weight:700}.booking-row-meta{font-size:12px;color:var(--muted);margin-top:3px}.booking-row-actions{display:flex;gap:6px}.booking-row-actions button{width:auto;padding:7px 9px}
+.booking-empty{padding:12px;border:1px dashed var(--border);border-radius:11px;color:var(--muted);font-size:13px}
+
+.note{font-size:13px;color:var(--muted);margin-top:8px}.foot{border-top:1px solid var(--border);margin-top:12px;padding-top:10px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center}
+.linkbtn{display:inline-block;background:var(--accent);color:#fff;text-decoration:none;padding:8px 10px;border-radius:9px;font-size:13px}.actions{display:flex;gap:6px;flex-wrap:wrap}
+.hidden{display:none}.slot-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr 2fr auto;gap:7px;align-items:center;padding:9px 0;border-top:1px solid var(--border)}
+.yacht-list{display:grid;gap:9px;margin-top:12px}.yacht-row{display:grid;grid-template-columns:minmax(180px,2fr) repeat(3,minmax(90px,1fr)) auto auto;gap:8px;align-items:center;padding:11px;border:1px solid var(--border);border-radius:11px;background:var(--card)}
+.help{font-size:12px;color:var(--muted);margin-top:4px}
+
+.editor-shell{margin-top:18px;padding:0;overflow:hidden;border:1px solid var(--border);border-radius:18px;background:var(--card)}
+.editor-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:20px 22px;border-bottom:1px solid var(--border);background:var(--soft)}
+.editor-header h2{margin:0 0 4px}
+.editor-header p{margin:0;color:var(--muted);font-size:13px}
+.editor-body{display:grid;gap:18px;padding:20px}
+.form-section{border:1px solid var(--border);border-radius:14px;padding:16px;background:var(--card)}
+.form-section.soft{background:#fbfcfe}
+.section-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px}
+.section-head h3{margin:0 0 3px;font-size:17px}
+.section-head p{margin:0;color:var(--muted);font-size:12px}
+.section-head .toolbar{margin:0}
+.editor-actions{display:flex;justify-content:flex-end;gap:10px;padding:16px 20px;border-top:1px solid var(--border);background:#fbfcfe}
+.editor-actions button{width:auto;min-width:110px}
+.yacht-editor-panel{margin-top:14px;border:1px solid var(--border);border-radius:14px;padding:16px;background:var(--soft)}
+.yacht-editor-panel h3{margin:0 0 14px}
+.availability-panel{margin-top:16px;border-top:1px solid var(--border);padding-top:16px}
+.file-note{font-size:12px;color:var(--muted);margin-top:4px}
+.save-status{min-height:20px;margin-top:10px;font-size:13px;font-weight:600;color:#2e7d32}
+.save-status.error{color:var(--danger)}
+.storage-status{display:inline-flex;align-items:center;gap:6px;margin:0 0 16px;padding:7px 10px;border:1px solid var(--border);border-radius:999px;background:var(--card);font-size:12px;color:var(--muted)}
+.storage-dot{width:8px;height:8px;border-radius:50%;background:#2e7d32}
+.storage-dot.warn{background:#c58a00}.storage-dot.error{background:var(--danger)}
+input[type="file"]{padding:8px;background:#fbfcfe}
+.photo-preview{display:flex;gap:8px;flex-wrap:wrap;min-height:0}.photo-preview img{width:110px;height:78px;object-fit:cover;border-radius:10px;border:1px solid var(--border)}.photo-preview .preview-label{font-size:12px;color:var(--muted);width:100%}
+
+
+.dashboard-view.hidden,#availabilityDashboardView.hidden,#bookingDashboardView.hidden,#vendorDashboardView.hidden{display:none!important}
+.vendor-dashboard-hero{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:14px}
+.vendor-dashboard-hero h2{margin:0 0 5px}
+.vendor-dashboard-hero p{margin:0;color:var(--muted);font-size:13px}
+.vendor-dashboard-hero button{width:auto}
+.view-tabs{display:flex;gap:8px;margin:0 0 16px;flex-wrap:wrap}
+.view-tab{width:auto;padding:10px 16px;font-weight:700}
+.view-tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.availability-shell{display:grid;gap:16px}
+.availability-hero{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap}
+.availability-hero h2{margin:0 0 5px}
+.availability-hero p{margin:0;color:var(--muted);font-size:13px}
+.availability-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.availability-form-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.availability-filter-grid{display:grid;grid-template-columns:2fr repeat(4,minmax(130px,1fr));gap:10px;align-items:end}
+.availability-total{padding:12px;border-radius:12px;background:var(--soft);color:var(--accent);font-weight:800}
+.availability-list{display:grid;gap:10px}
+.availability-record{border:1px solid var(--border);border-radius:14px;background:var(--card);overflow:hidden}
+.availability-record summary{list-style:none;cursor:pointer;padding:11px 13px}
+.availability-record summary::-webkit-details-marker{display:none}
+.availability-record summary:hover{background:#fbfcfe}
+.availability-summary{display:grid;grid-template-columns:minmax(130px,1fr) minmax(180px,1.4fr) minmax(120px,.8fr) auto;gap:12px;align-items:center}
+.availability-summary-item span{display:block;font-size:11px;color:var(--muted);margin-bottom:2px}
+.availability-summary-item strong{font-size:14px}
+.availability-chevron{font-size:18px;color:var(--muted);transition:transform .18s ease}
+.availability-record[open] .availability-chevron{transform:rotate(180deg)}
+.availability-expanded{padding:0 13px 13px;border-top:1px solid var(--border)}
+.availability-record-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap;margin-top:12px}
+.availability-record-title{font-weight:800;font-size:16px}
+.availability-record-sub{color:var(--muted);font-size:13px;margin-top:3px}
+.availability-record-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin-top:12px}
+.availability-record-grid>div{border:1px solid var(--border);border-radius:10px;padding:9px;background:#fbfcfe}
+.availability-record-grid span{display:block;font-size:11px;color:var(--muted);margin-bottom:3px}
+.availability-record-grid strong{font-size:13px}
+.availability-status{display:inline-flex;border-radius:999px;padding:6px 10px;font-size:12px;font-weight:800;background:#eef0f3;color:#586174}
+.availability-status.available{background:#e8f5e9;color:#256b2b}
+.availability-status.booked{background:#e7f0ff;color:#184f9c}
+.availability-status.on-hold{background:#fff4db;color:#8a6214}
+.availability-status.unavailable{background:#fdecec;color:#a22a20}
+.availability-empty{padding:20px;border:1px dashed var(--border);border-radius:14px;color:var(--muted);text-align:center}
+
+.booking-dashboard-shell{display:grid;gap:14px}
+.booking-dashboard-hero{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
+.booking-dashboard-hero h2{margin:0 0 5px}
+.booking-dashboard-hero p{margin:0;color:var(--muted);font-size:13px}
+.booking-dashboard-metrics{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.booking-editor-card{border:2px solid #cbd7e4;box-shadow:0 12px 28px rgba(31,78,120,.08)}
+.booking-dashboard-form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.booking-dashboard-filter{display:grid;grid-template-columns:2fr repeat(2,minmax(150px,1fr));gap:10px;align-items:end}
+.booking-total-box{padding:12px;border-radius:12px;background:var(--soft);color:var(--accent);font-weight:800}
+.booking-conflict{margin-top:8px;padding:9px 11px;border-radius:10px;background:#fff4db;color:#8a6214;font-size:13px;font-weight:700}
+.booking-save-banner{padding:11px 13px;border-radius:11px;background:#e8f5e9;color:#256b2b;font-size:13px;font-weight:800;margin-bottom:12px}
+.booking-list{display:grid;gap:9px}
+.booking-list-header{display:grid;grid-template-columns:minmax(170px,1.25fr) minmax(145px,1fr) minmax(190px,1.35fr) minmax(105px,.7fr) minmax(115px,.75fr) 34px;gap:12px;padding:0 14px 7px;color:var(--muted);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em}
+.booking-card{border:1px solid var(--border);border-radius:13px;background:var(--card);overflow:hidden}
+.booking-card summary{list-style:none;cursor:pointer;padding:11px 14px}
+.booking-card summary::-webkit-details-marker{display:none}
+.booking-card summary:hover{background:#f8fafc}
+.booking-card[open]{border-color:#9fb4c8;box-shadow:0 8px 22px rgba(31,78,120,.07)}
+.booking-summary{display:grid;grid-template-columns:minmax(170px,1.25fr) minmax(145px,1fr) minmax(190px,1.35fr) minmax(105px,.7fr) minmax(115px,.75fr) 34px;gap:12px;align-items:center}
+.booking-summary-cell{min-width:0}
+.booking-summary-cell>span{display:block;font-size:11px;color:var(--muted);margin-bottom:2px}
+.booking-summary-cell>strong{display:block;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.booking-summary-primary strong{font-size:15px}
+.booking-summary-primary small{display:block;color:var(--muted);font-size:12px;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.booking-summary-status{display:flex;flex-direction:column;align-items:flex-start;gap:4px}
+.booking-summary-chevron{display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--muted);transition:transform .18s ease}
+.booking-card[open] .booking-summary-chevron{transform:rotate(180deg)}
+.booking-expanded{padding:14px;border-top:1px solid var(--border);background:#fbfcfe}
+.booking-detail-sections{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+  align-items:stretch
+}
+.booking-detail-section{
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:13px;
+  background:#fff;
+  min-width:0;
+  height:100%
+}
+.booking-detail-section h4{
+  margin:0 0 10px;
+  padding-bottom:8px;
+  border-bottom:1px solid var(--border);
+  font-size:14px;
+  color:var(--accent)
+}
+.booking-detail-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px
+}
+.booking-detail-grid>div{
+  border-radius:9px;
+  padding:9px 10px;
+  background:#f7f9fb;
+  min-width:0
+}
+.booking-detail-grid span{display:block;font-size:11px;color:var(--muted);margin-bottom:3px}
+.booking-detail-grid strong{
+  display:block;
+  font-size:13px;
+  line-height:1.35;
+  overflow-wrap:anywhere
+}
+.booking-attention-box{margin-top:12px;padding:10px 11px;border:1px solid #efb3b3;border-radius:10px;background:#fff4f4;color:#8f1d1d;font-size:13px;font-weight:700}
+.booking-status{display:inline-flex;border-radius:999px;padding:6px 10px;font-size:12px;font-weight:800;background:#eef0f3;color:#586174}
+.booking-status.inquiry{background:#fff4db;color:#8a6214}
+.booking-status.confirmed{background:#e7f0ff;color:#184f9c}
+.booking-status.completed{background:#e8f5e9;color:#256b2b}
+.booking-status.rescheduled{background:#f4e8ff;color:#65409a}
+.booking-status.cancelled{background:#fdecec;color:#a22a20}
+.payment-status{display:inline-flex;border-radius:999px;padding:5px 9px;font-size:12px;font-weight:700;background:#eef0f3;color:#586174}
+.payment-status.paid-in-full{background:#e8f5e9;color:#256b2b}
+.payment-status.deposit-paid{background:#e7f0ff;color:#184f9c}
+.payment-status.unpaid{background:#fff4db;color:#8a6214}
+.payment-status.refunded{background:#f4e8ff;color:#65409a}
+.booking-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px;justify-content:flex-end}
+.booking-actions button{width:auto}
+.booking-empty-dashboard{padding:20px;border:1px dashed var(--border);border-radius:14px;color:var(--muted);text-align:center}
+
+.notification-tab-badge{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;margin-left:6px;padding:0 6px;border-radius:999px;background:#c62828;color:#fff;font-size:11px;font-weight:800}
+.notification-tab-badge.zero{background:#8a94a3}
+.notification-shell{display:grid;gap:16px}
+.notification-hero{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap}
+.notification-hero h2{margin:0 0 5px}
+.notification-hero p{margin:0;color:var(--muted);font-size:13px}
+.notification-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.notification-filter-grid{display:grid;grid-template-columns:2fr repeat(2,minmax(150px,1fr));gap:10px;align-items:end}
+.notification-list{display:grid;gap:11px}
+.notification-card{border:2px solid #d32f2f;border-radius:14px;background:#fff4f4;padding:14px}
+.notification-card.resolved{border-color:#82b886;background:#f1faf2}
+.notification-card-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+.notification-card-title{font-size:16px;font-weight:800;color:#8f1d1d}
+.notification-card.resolved .notification-card-title{color:#256b2b}
+.notification-card-sub{font-size:13px;color:var(--muted);margin-top:3px}
+.notification-reasons{display:grid;gap:6px;margin-top:11px}
+.notification-reason{display:flex;align-items:flex-start;gap:8px;padding:8px 10px;border-radius:10px;background:#fff;border:1px solid #efb3b3;color:#8f1d1d;font-size:13px;font-weight:700}
+.notification-card.resolved .notification-reason{border-color:#b7d7ba;color:#256b2b}
+.notification-check{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;background:#fff;border:1px solid var(--border);font-size:13px;font-weight:700}
+.notification-check input{width:18px;height:18px;margin:0}
+.notification-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.notification-actions button{width:auto}
+.notification-empty{padding:24px;border:1px dashed var(--border);border-radius:14px;color:var(--muted);text-align:center}
+.attention-inline{display:inline-flex;align-items:center;border-radius:999px;padding:5px 8px;background:#fdecec;color:#a22a20;font-size:11px;font-weight:800;margin-top:5px}
+
+
+.availability-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
+.availability-actions button{width:auto}
+
+@media(max-width:920px){
+  .metrics,.availability-metrics,.booking-dashboard-metrics,.notification-metrics{grid-template-columns:repeat(2,1fr)}
+  .availability-form-grid,.availability-filter-grid,.availability-record-grid,.availability-summary,.booking-dashboard-form,.booking-dashboard-filter,.booking-summary,.booking-detail-grid,.booking-detail-sections,.notification-filter-grid{grid-template-columns:1fr}
+  .booking-list-header{display:none}
+  .booking-summary-cell>strong{white-space:normal}
+  .booking-summary-chevron{position:absolute;right:14px;top:14px}
+  .booking-card summary{position:relative;padding-right:46px}
+  .controls,.grid,.formgrid,.formgrid.three{grid-template-columns:1fr}
+  .span-2,.span-3{grid-column:span 1}
+  .yacht-row,.slot-row{grid-template-columns:1fr 1fr}
+  .editor-header{padding:16px}
+  .editor-body{padding:14px}
+  .editor-actions{padding:14px;flex-direction:column-reverse}
+  .editor-actions button{width:100%}
+  .section-head{flex-direction:column}
+  .section-head .toolbar{width:100%}
+  .section-head .toolbar button{width:100%}
+  .reliability-details{grid-template-columns:1fr}
+  .booking-row-head{flex-direction:column}
+  .booking-stat{text-align:left}
+  .wrap{padding:14px}
+}
+
+.cloud-panel{margin:12px 0 16px;padding:14px;border:1px solid #d8e1eb;border-radius:12px;background:#fff}
+.cloud-row{display:flex;gap:8px;align-items:end;flex-wrap:wrap}
+.cloud-field{min-width:190px;flex:1}
+.cloud-field label{display:block;font-size:12px;font-weight:700;margin-bottom:5px;color:#475569}
+.cloud-field input{width:100%;padding:9px 10px;border:1px solid #cbd5e1;border-radius:8px}
+.cloud-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.cloud-status{margin-top:10px;padding:9px 10px;border-radius:8px;background:#eef2f7;font-size:13px}
+.cloud-status.good{background:#e9f8ef;color:#176b37}.cloud-status.bad{background:#fdecec;color:#a52b2b}
+.cloud-user{font-weight:700}
