@@ -384,6 +384,7 @@ let cloudAutoSyncTimer=null;
 let cloudAutoSyncBusy=false;
 let cloudRole='view_only';
 let cloudProfile=null;
+let auditLogRecords=[];
 
 
 const ROLE_LABELS={admin:'Admin',operations:'Operations',sales:'Sales',view_only:'View Only'};
@@ -482,6 +483,95 @@ async function loadTeamUsers(){
       setCloudStatus('Team role updated.','good');
     };
   });
+}
+
+
+function auditModuleLabel(module){
+  return {vendors:'Vendor',yachts:'Yacht',availability:'Availability',bookings:'Booking',user_profiles:'Team Role'}[module]||module||'Record';
+}
+function auditActionLabel(action){
+  return {INSERT:'Created',UPDATE:'Updated',DELETE:'Deleted'}[action]||action||'Changed';
+}
+function auditRecordDisplay(row){
+  return row.record_name||row.record_id||'Record';
+}
+function auditChangedFields(oldValue,newValue){
+  if(!oldValue||!newValue)return '';
+  const ignored=new Set(['updated_at','created_at']);
+  const keys=[...new Set([...Object.keys(oldValue||{}),...Object.keys(newValue||{})])];
+  const changes=[];
+  for(const key of keys){
+    if(ignored.has(key))continue;
+    const before=oldValue?.[key],after=newValue?.[key];
+    if(JSON.stringify(before)!==JSON.stringify(after)){
+      changes.push(`${key.replaceAll('_',' ')}: ${before??'—'} → ${after??'—'}`);
+    }
+    if(changes.length>=6)break;
+  }
+  return changes.join('\n');
+}
+function auditTimePasses(row){
+  const filter=$('auditTimeFilter')?.value||'all';
+  if(filter==='all')return true;
+  const when=new Date(row.created_at);
+  const now=new Date();
+  if(filter==='today'){
+    return when.getFullYear()===now.getFullYear()&&when.getMonth()===now.getMonth()&&when.getDate()===now.getDate();
+  }
+  const days=Number(filter);
+  return Number.isFinite(days)&&when.getTime()>=Date.now()-days*86400000;
+}
+function filteredAuditLogs(){
+  const q=String($('auditSearch')?.value||'').trim().toLowerCase();
+  const module=$('auditModuleFilter')?.value||'';
+  const action=$('auditActionFilter')?.value||'';
+  return auditLogRecords.filter(row=>{
+    if(module&&row.module!==module)return false;
+    if(action&&row.action!==action)return false;
+    if(!auditTimePasses(row))return false;
+    if(!q)return true;
+    return [
+      row.actor_email,row.actor_role,row.module,row.action,row.record_id,row.record_name,
+      JSON.stringify(row.old_value||{}),JSON.stringify(row.new_value||{})
+    ].join(' ').toLowerCase().includes(q);
+  });
+}
+function renderAuditLog(){
+  const box=$('auditLogList'),summary=$('auditSummary');
+  if(!box||!summary)return;
+  const rows=filteredAuditLogs();
+  summary.textContent=`Showing ${rows.length} of ${auditLogRecords.length} recorded activities.`;
+  if(!rows.length){
+    box.innerHTML='<div class="empty-state">No audit activity matches these filters.</div>';
+    return;
+  }
+  box.innerHTML=rows.map(row=>{
+    const when=new Date(row.created_at);
+    const changes=row.action==='UPDATE'?auditChangedFields(row.old_value,row.new_value):'';
+    return `<article class="audit-entry">
+      <div class="audit-entry-time">${escapeHtml(when.toLocaleDateString())}<br>${escapeHtml(when.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'}))}</div>
+      <div class="audit-entry-user">${escapeHtml(row.actor_email||'System')}<div><span class="audit-badge">${escapeHtml(roleLabel(row.actor_role||'view_only'))}</span></div></div>
+      <div class="audit-entry-action">${escapeHtml(auditActionLabel(row.action))}<div><span class="audit-badge">${escapeHtml(auditModuleLabel(row.module))}</span></div></div>
+      <div class="audit-entry-detail"><strong>${escapeHtml(auditRecordDisplay(row))}</strong>
+        ${changes?`<div class="audit-change">${escapeHtml(changes)}</div>`:''}
+      </div>
+    </article>`;
+  }).join('');
+}
+async function loadAuditLogs({quiet=false}={}){
+  if(!cloudUser)return;
+  const sb=initCloudClient();if(!sb)return;
+  if(!quiet&&$('auditSummary'))$('auditSummary').textContent='Loading audit activity…';
+  const {data,error}=await sb.from('audit_logs')
+    .select('id,actor_user_id,actor_email,actor_role,action,module,record_id,record_name,old_value,new_value,created_at')
+    .order('created_at',{ascending:false})
+    .limit(300);
+  if(error){
+    if($('auditSummary'))$('auditSummary').textContent='Could not load audit activity: '+error.message;
+    return;
+  }
+  auditLogRecords=data||[];
+  renderAuditLog();
 }
 
 function setCloudStatus(message,type=''){
@@ -717,6 +807,7 @@ async function runCloudAutoSync(){
   cloudAutoSyncBusy=true;
   try{
     await loadSharedVendors({quiet:true});
+    if(!$('auditDashboardView')?.classList.contains('hidden'))await loadAuditLogs({quiet:true});
   }catch(e){
     console.warn('Background shared-data refresh failed:',e);
   }finally{
@@ -771,6 +862,7 @@ function startCloudRealtime(){
     .on('postgres_changes',{event:'*',schema:'public',table:'yachts'},scheduleRealtimeRefresh)
     .on('postgres_changes',{event:'*',schema:'public',table:'availability'},scheduleRealtimeRefresh)
     .on('postgres_changes',{event:'*',schema:'public',table:'bookings'},scheduleRealtimeRefresh)
+    .on('postgres_changes',{event:'*',schema:'public',table:'audit_logs'},()=>{if(!$('auditDashboardView')?.classList.contains('hidden'))loadAuditLogs({quiet:true})})
     .subscribe(status=>{
       if(status==='SUBSCRIBED'){
         startCloudAutoSync();
@@ -2065,18 +2157,22 @@ function setDashboardView(view){
   const availability=view==='availability';
   const bookings=view==='bookings';
   const notifications=view==='notifications';
-  const vendorsView=!availability&&!bookings&&!notifications;
+  const audit=view==='audit';
+  const vendorsView=!availability&&!bookings&&!notifications&&!audit;
   $('availabilityDashboardView').classList.toggle('hidden',!availability);
   $('bookingDashboardView').classList.toggle('hidden',!bookings);
   $('notificationsDashboardView').classList.toggle('hidden',!notifications);
+  $('auditDashboardView').classList.toggle('hidden',!audit);
   $('vendorDashboardView').classList.toggle('hidden',!vendorsView);
   $('showAvailabilityDashboard').classList.toggle('active',availability);
   $('showBookingDashboard').classList.toggle('active',bookings);
   $('showNotificationsDashboard').classList.toggle('active',notifications);
+  $('showAuditDashboard').classList.toggle('active',audit);
   $('showVendorDashboard').classList.toggle('active',vendorsView);
   if(availability)renderAvailabilityDashboard();
   if(bookings)renderMasterBookingDashboard();
   if(notifications)renderNotificationsDashboard();
+  if(audit)loadAuditLogs();
 }
 
 function displayYachtName(y,index=0){const name=String((y&&y.name)||'').trim();return name||`Yacht ${index+1}`}
@@ -2663,6 +2759,9 @@ $('fCompletedBookings').addEventListener('input',()=>{
 $('dismissAppError').onclick=()=>$('appErrorBanner').classList.add('hidden');
 $('showBookingDashboard').onclick=()=>setDashboardView('bookings');
 $('showNotificationsDashboard').onclick=()=>setDashboardView('notifications');
+$('showAuditDashboard').onclick=()=>setDashboardView('audit');
+$('refreshAuditLog').onclick=()=>loadAuditLogs();
+['auditSearch','auditModuleFilter','auditActionFilter','auditTimeFilter'].forEach(id=>{const el=$(id);if(el)el.oninput=renderAuditLog;});
 $('reviewNextNotification').onclick=()=>{
   const next=masterBookingRecords.find(bookingRequiresAttention);
   if(!next)return alert('No bookings currently require attention.');
