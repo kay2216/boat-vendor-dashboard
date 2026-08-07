@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Boat Vendor Dashboard V2 — Supabase Connection Test</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    *{box-sizing:border-box}
+    body{font-family:Arial,sans-serif;margin:0;background:#f5f7fb;color:#172033}
+    .wrap{max-width:760px;margin:50px auto;padding:20px}
+    .card{background:white;border:1px solid #dde3ec;border-radius:14px;padding:24px;box-shadow:0 8px 28px rgba(0,0,0,.06)}
+    h1{margin-top:0}
+    label{display:block;font-weight:700;margin:16px 0 6px}
+    input{width:100%;padding:12px;border:1px solid #ccd4df;border-radius:8px;font-size:15px}
+    button{padding:11px 16px;border:0;border-radius:8px;background:#174f78;color:white;font-weight:700;cursor:pointer;margin:12px 8px 0 0}
+    button.secondary{background:#5c6675}
+    .status{margin-top:20px;padding:14px;border-radius:8px;background:#eef3f8;white-space:pre-wrap}
+    .good{background:#e8f7ed;color:#176b35}
+    .bad{background:#fdecec;color:#a52b2b}
+    .note{font-size:13px;color:#5d6775;line-height:1.5}
+    code{background:#eef2f6;padding:2px 5px;border-radius:4px}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <h1>Boat Vendor Dashboard V2</h1>
+    <p>This page safely tests your Supabase connection before we change the live dashboard.</p>
+
+    <label>Supabase Project URL</label>
+    <input id="url" value="https://lhyujxypmdavqwysqcmo.supabase.co" />
+
+    <label>Publishable Key</label>
+    <input id="key" type="password" placeholder="Paste the sb_publishable_... key here" />
+
+    <label>Your email</label>
+    <input id="email" type="email" placeholder="you@company.com" />
+
+    <label>Password</label>
+    <input id="password" type="password" placeholder="At least 6 characters" />
+
+    <div>
+      <button id="signup">Create Test Account</button>
+      <button id="signin">Sign In</button>
+      <button id="dbtest" class="secondary">Test Database</button>
+      <button id="signout" class="secondary">Sign Out</button>
+    </div>
+
+    <p class="note">
+      Use only the <strong>Publishable key</strong>. Never paste a secret key, service-role key,
+      or database password here. The publishable key is designed for browser applications.
+    </p>
+
+    <div id="status" class="status">Ready. Paste your Publishable Key, then create an account or sign in.</div>
+  </div>
+</div>
+
+<script>
+let client = null;
+const statusBox = document.getElementById('status');
+
+function show(message, ok=true) {
+  statusBox.textContent = message;
+  statusBox.className = 'status ' + (ok ? 'good' : 'bad');
+}
+
+function getClient() {
+  const url = document.getElementById('url').value.trim();
+  const key = document.getElementById('key').value.trim();
+  if (!url || !key) throw new Error('Enter the Project URL and Publishable Key first.');
+  if (key.startsWith('sb_secret_')) throw new Error('STOP: that is a Secret Key. Use the sb_publishable_ key instead.');
+  client = supabase.createClient(url, key);
+  return client;
+}
+
+document.getElementById('signup').onclick = async () => {
+  try {
+    const sb = getClient();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    if (!email || !password) throw new Error('Enter your email and password.');
+    const { data, error } = await sb.auth.signUp({ email, password });
+    if (error) throw error;
+    if (data.session) {
+      show('SUCCESS: Account created and you are signed in. Now click “Test Database”.');
+    } else {
+      show('Account created. Supabase may require email confirmation. Check your email, confirm it, then come back and click “Sign In”.');
+    }
+  } catch (e) {
+    show('ERROR: ' + e.message, false);
+  }
+};
+
+document.getElementById('signin').onclick = async () => {
+  try {
+    const sb = getClient();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const { data, error } = await sb.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+    show('SUCCESS: Signed in as ' + data.user.email + '. Now click “Test Database”.');
+  } catch (e) {
+    show('ERROR: ' + e.message, false);
+  }
+};
+
+document.getElementById('dbtest').onclick = async () => {
+  try {
+    const sb = getClient();
+    const { data: authData } = await sb.auth.getUser();
+    if (!authData.user) throw new Error('You are not signed in. Create an account or sign in first.');
+
+    const { data, error } = await sb.from('vendors').select('id,name').limit(5);
+    if (error) throw error;
+    show('DATABASE CONNECTED!\nSigned in: ' + authData.user.email +
+         '\nThe vendors table is reachable. Rows currently returned: ' + data.length +
+         '\n\nThis means we are ready to connect the real dashboard.');
+  } catch (e) {
+    show('DATABASE TEST FAILED: ' + e.message, false);
+  }
+};
+
+document.getElementById('signout').onclick = async () => {
+  try {
+    const sb = getClient();
+    await sb.auth.signOut();
+    show('Signed out.');
+  } catch (e) {
+    show('ERROR: ' + e.message, false);
+  }
+};
+</script>
+</body>
+</html>
