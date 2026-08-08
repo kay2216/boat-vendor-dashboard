@@ -493,7 +493,22 @@ function auditActionLabel(action){
   return {INSERT:'Created',UPDATE:'Updated',DELETE:'Deleted'}[action]||action||'Changed';
 }
 function auditRecordDisplay(row){
-  return row.record_name||row.record_id||'Record';
+  const data = row.new_value || row.old_value || {};
+
+  if(row.module === 'availability'){
+    const date = data.availability_date || '';
+    const start = data.start_time || '';
+    const end = data.end_time || '';
+    const status = data.status || '';
+
+    const parts = [date, start && end ? `${start}–${end}` : start || end, status]
+      .filter(Boolean);
+
+    return parts.length ? `Availability — ${parts.join(' — ')}` : (row.record_name || row.record_id || 'Availability');
+  }
+
+  return row.record_name || row.record_id || 'Record';
+}
 }
 function auditChangedFields(oldValue,newValue){
   if(!oldValue||!newValue)return '';
