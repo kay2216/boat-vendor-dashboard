@@ -509,7 +509,6 @@ function auditRecordDisplay(row){
 
   return row.record_name || row.record_id || 'Record';
 }
-}
 function auditChangedFields(oldValue,newValue){
   if(!oldValue||!newValue)return '';
   const ignored=new Set(['updated_at','created_at']);
