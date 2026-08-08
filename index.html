@@ -1,671 +1,1211 @@
-Boat Vendor Dashboard
-Each vendor appears once. Track yacht details, reliability, completed bookings, and vendor behavior in one dashboard.
-Preparing photo storage…
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- Boat Vendor Dashboard modular build -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Boat Vendor Dashboard</title>
+<link rel="stylesheet" href="css/styles.css">
 
-Dismiss
-Shared Team Database (Supabase)
-Email
-Password
-Sign in Create account Sign out Refresh shared data Upload current vendors once Upload current availability once Upload current bookings once
-Not signed in. Your current dashboard data is still available locally.
-Access role: not loaded
-Team access
-Admins can change each signed-up team member's dashboard role.
-Refresh users
-No users loaded.
-Vendors Availability Bookings Notifications 0 Audit Log
-Charter Availability Dashboard
-Select a company and yacht, then record its date, time, hourly charter price, and availability status. Times are limited to 30-minute intervals from 8:00 AM through 12:00 midnight.
-New availability entry
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+        onerror="this.onerror=null;this.src='https://unpkg.com/@supabase/supabase-js@2'"></script>
+</head>
+<body>
+<div class="wrap">
+<h1>Boat Vendor Dashboard</h1>
+<div class="sub">Each vendor appears once. Track yacht details, reliability, completed bookings, and vendor behavior in one dashboard.</div>
+<div id="storageStatus" class="storage-status"><span id="storageDot" class="storage-dot"></span><span id="storageText">Preparing photo storage…</span></div>
+<div id="photoStorageNotice" class="note" style="margin:-8px 0 16px"></div>
+<div id="appErrorBanner" class="app-error-banner hidden" role="alert"><span id="appErrorText"></span><button id="dismissAppError" type="button">Dismiss</button></div>
 
-Add availability
-The yacht’s existing hourly price is filled automatically and can be changed for this charter.
-Company
-          Select company
-         Yacht
-          Select yacht
-         Date Status
-          Available
-          Booked
-          On Hold
-          Unavailable
-         From time
-Select time
-8:00 AM
-8:30 AM
-9:00 AM
-9:30 AM
-10:00 AM
-10:30 AM
-11:00 AM
-11:30 AM
-12:00 PM
-12:30 PM
-1:00 PM
-1:30 PM
-2:00 PM
-2:30 PM
-3:00 PM
-3:30 PM
-4:00 PM
-4:30 PM
-5:00 PM
-5:30 PM
-6:00 PM
-6:30 PM
-7:00 PM
-7:30 PM
-8:00 PM
-8:30 PM
-9:00 PM
-9:30 PM
-10:00 PM
-10:30 PM
-11:00 PM
-11:30 PM
-To time
-Select time
-8:30 AM
-9:00 AM
-9:30 AM
-10:00 AM
-10:30 AM
-11:00 AM
-11:30 AM
-12:00 PM
-12:30 PM
-1:00 PM
-1:30 PM
-2:00 PM
-2:30 PM
-3:00 PM
-3:30 PM
-4:00 PM
-4:30 PM
-5:00 PM
-5:30 PM
-6:00 PM
-6:30 PM
-7:00 PM
-7:30 PM
-8:00 PM
-8:30 PM
-9:00 PM
-9:30 PM
-10:00 PM
-10:30 PM
-11:00 PM
-11:30 PM
-12:00 AM (midnight)
-Charter price per hour ($) Captain included?
-          Unknown
-          Yes
-          No
-         Captain price ($) Fuel included?
-          Unknown
-          Yes
-          No
-         Operator name Client / reference Notes
-Enter the start time, end time, and hourly price.
-Clear Save availability
+<section id="cloudPanel" class="cloud-panel">
+  <div><strong>Shared Team Database</strong> <span class="note">(Supabase)</span></div>
+  <div class="cloud-row">
+    <div class="cloud-field"><label>Email</label><input id="cloudEmail" type="email" placeholder="you@company.com"></div>
+    <div class="cloud-field"><label>Password</label><input id="cloudPassword" type="password" placeholder="Your Supabase password"></div>
+  </div>
+  <div class="cloud-actions">
+    <button id="cloudSignIn" class="primary" type="button">Sign in</button>
+    <button id="cloudCreateAccount" type="button">Create account</button>
+    <button id="cloudSignOut" type="button">Sign out</button>
+    <button id="cloudRefresh" type="button">Refresh shared data</button>
+    <button id="cloudUploadExisting" type="button">Upload current vendors once</button>
+    <button id="cloudUploadAvailability" type="button">Upload current availability once</button>
+    <button id="cloudUploadBookings" type="button">Upload current bookings once</button>
+  </div>
+  <div id="cloudStatus" class="cloud-status">Not signed in. Your current dashboard data is still available locally.</div>
+  <div id="roleStatus" class="cloud-status">Access role: not loaded</div>
+  <section id="userManagementPanel" class="card hidden" style="margin-top:10px">
+    <div class="section-head">
+      <div>
+        <h3>Team access</h3>
+        <p>Admins can change each signed-up team member's dashboard role.</p>
+      </div>
+      <button id="refreshTeamUsers" type="button">Refresh users</button>
+    </div>
+    <div id="teamUserList" class="note">No users loaded.</div>
+  </section>
+</section>
 
-Saved availability
-Each entry shows only the date, available time, and hourly price. Open an entry to see the remaining details.
-Download availability CSV
-Search Company
-          All companies
-         Date Operator
-          All operators
-         Status
-          All statuses
-          Available
-          Booked
-          On Hold
-          Unavailable
-        
-Reset availability filters
+<div class="view-tabs">
+  <button id="showVendorDashboard" class="view-tab active" type="button">Vendors</button>
+  <button id="showAvailabilityDashboard" class="view-tab" type="button">Availability</button>
+  <button id="showBookingDashboard" class="view-tab" type="button">Bookings</button>
+  <button id="showNotificationsDashboard" class="view-tab" type="button">Notifications <span id="notificationCountBadge" class="notification-tab-badge zero">0</span></button>
+  <button id="showAuditDashboard" class="view-tab" type="button">Audit Log</button>
+</div>
 
-Booking Dashboard
-Use the compact booking list below. Click a booking row to view every detail, or use New booking to open the editor.
-New booking
+<section id="availabilityDashboardView" class="availability-shell dashboard-view hidden">
+  <section class="card">
+    <div class="availability-hero">
+      <div>
+        <h2>Charter Availability Dashboard</h2>
+        <p>Select a company and yacht, then record its date, time, hourly charter price, and availability status. Times are limited to 30-minute intervals from 8:00 AM through 12:00 midnight.</p>
+      </div>
+      <button id="newAvailabilityEntry" class="primary" type="button" style="width:auto">New availability entry</button>
+    </div>
+  </section>
 
-Add booking
-Confirmed and completed bookings are automatically marked as booked in the Availability Dashboard.
-Close editor
-Client name Client phone
-+1
+  <div id="availabilityMetrics" class="availability-metrics"></div>
 
-The U.S. country code +1 is added automatically. Client email Booking reference Booking entered date Original / imported boat name Customer hourly rate ($) Booking date From time
-          Select time
-8:00 AM
-8:30 AM
-9:00 AM
-9:30 AM
-10:00 AM
-10:30 AM
-11:00 AM
-11:30 AM
-12:00 PM
-12:30 PM
-1:00 PM
-1:30 PM
-2:00 PM
-2:30 PM
-3:00 PM
-3:30 PM
-4:00 PM
-4:30 PM
-5:00 PM
-5:30 PM
-6:00 PM
-6:30 PM
-7:00 PM
-7:30 PM
-8:00 PM
-8:30 PM
-9:00 PM
-9:30 PM
-10:00 PM
-10:30 PM
-11:00 PM
-11:30 PM
-         To time
-          Select time
-8:30 AM
-9:00 AM
-9:30 AM
-10:00 AM
-10:30 AM
-11:00 AM
-11:30 AM
-12:00 PM
-12:30 PM
-1:00 PM
-1:30 PM
-2:00 PM
-2:30 PM
-3:00 PM
-3:30 PM
-4:00 PM
-4:30 PM
-5:00 PM
-5:30 PM
-6:00 PM
-6:30 PM
-7:00 PM
-7:30 PM
-8:00 PM
-8:30 PM
-9:00 PM
-9:30 PM
-10:00 PM
-10:30 PM
-11:00 PM
-11:30 PM
-12:00 AM (midnight)
-         Guest count Assigned vendor Select vendor Assigned yacht Select vendor first Operator name Booking status
-          Inquiry
-          Confirmed
-          Rescheduled
-          Completed
-          Cancelled
-         Client change
-          No change
-          Rescheduled
-          Cancelled
-         Cancellation / reschedule reason
-Original schedule
-The current booking date and time above become the new schedule. These fields preserve the previous schedule.
-Original date Original from time
-              Select time
-8:00 AM
-8:30 AM
-9:00 AM
-9:30 AM
-10:00 AM
-10:30 AM
-11:00 AM
-11:30 AM
-12:00 PM
-12:30 PM
-1:00 PM
-1:30 PM
-2:00 PM
-2:30 PM
-3:00 PM
-3:30 PM
-4:00 PM
-4:30 PM
-5:00 PM
-5:30 PM
-6:00 PM
-6:30 PM
-7:00 PM
-7:30 PM
-8:00 PM
-8:30 PM
-9:00 PM
-9:30 PM
-10:00 PM
-10:30 PM
-11:00 PM
-11:30 PM
-             Original to time
-              Select time
-8:30 AM
-9:00 AM
-9:30 AM
-10:00 AM
-10:30 AM
-11:00 AM
-11:30 AM
-12:00 PM
-12:30 PM
-1:00 PM
-1:30 PM
-2:00 PM
-2:30 PM
-3:00 PM
-3:30 PM
-4:00 PM
-4:30 PM
-5:00 PM
-5:30 PM
-6:00 PM
-6:30 PM
-7:00 PM
-7:30 PM
-8:00 PM
-8:30 PM
-9:00 PM
-9:30 PM
-10:00 PM
-10:30 PM
-11:00 PM
-11:30 PM
-12:00 AM (midnight)
-            
-Customer total price ($) Vendor price per hour ($) Deposit paid ($) Payment status
-          Unpaid
-          Deposit Paid
-          Paid in Full
-          Refunded
-         Captain included?
-          Unknown
-          Yes
-          No
-         Captain price ($) Fuel included?
-          Unknown
-          Yes
-          No
-         Boarding location
-          Select boarding location
-          31st Street Harbor
-          Diversey Harbor
-          Navy Pier
-          Burnham Harbor
-          Belmont Harbor
-          DuSable Harbor
-         Vendor behavior
-          Not rated
-              Excellent
-          Good
-          Average
-          Poor
-          Problem
-         Booking notes
-Enter the time, customer price, and vendor cost.
+  <section id="availabilityEntryCard" class="card">
+    <div class="section-head">
+      <div>
+        <h3 id="availabilityFormTitle">Add availability</h3>
+        <p>The yacht’s existing hourly price is filled automatically and can be changed for this charter.</p>
+      </div>
+    </div>
 
-Cancel Save booking
+    <div class="availability-form-grid">
+      <label class="form-field">Company
+        <select id="availabilityCompany">
+          <option value="">Select company</option>
+        </select>
+      </label>
+      <label class="form-field">Yacht
+        <select id="availabilityYacht">
+          <option value="">Select yacht</option>
+        </select>
+      </label>
+      <label class="form-field">Date<input id="availabilityDate" type="date"></label>
+      <label class="form-field">Status
+        <select id="availabilityStatus">
+          <option value="Available">Available</option>
+          <option value="Booked">Booked</option>
+          <option value="On Hold">On Hold</option>
+          <option value="Unavailable">Unavailable</option>
+        </select>
+      </label>
+      <label class="form-field">From time
+          <select id="availabilityStart">
+<option value="">Select time</option>
+<option value="08:00">8:00 AM</option>
+<option value="08:30">8:30 AM</option>
+<option value="09:00">9:00 AM</option>
+<option value="09:30">9:30 AM</option>
+<option value="10:00">10:00 AM</option>
+<option value="10:30">10:30 AM</option>
+<option value="11:00">11:00 AM</option>
+<option value="11:30">11:30 AM</option>
+<option value="12:00">12:00 PM</option>
+<option value="12:30">12:30 PM</option>
+<option value="13:00">1:00 PM</option>
+<option value="13:30">1:30 PM</option>
+<option value="14:00">2:00 PM</option>
+<option value="14:30">2:30 PM</option>
+<option value="15:00">3:00 PM</option>
+<option value="15:30">3:30 PM</option>
+<option value="16:00">4:00 PM</option>
+<option value="16:30">4:30 PM</option>
+<option value="17:00">5:00 PM</option>
+<option value="17:30">5:30 PM</option>
+<option value="18:00">6:00 PM</option>
+<option value="18:30">6:30 PM</option>
+<option value="19:00">7:00 PM</option>
+<option value="19:30">7:30 PM</option>
+<option value="20:00">8:00 PM</option>
+<option value="20:30">8:30 PM</option>
+<option value="21:00">9:00 PM</option>
+<option value="21:30">9:30 PM</option>
+<option value="22:00">10:00 PM</option>
+<option value="22:30">10:30 PM</option>
+<option value="23:00">11:00 PM</option>
+<option value="23:30">11:30 PM</option>
+</select>
+        </label>
+      <label class="form-field">To time
+          <select id="availabilityEnd">
+<option value="">Select time</option>
+<option value="08:30">8:30 AM</option>
+<option value="09:00">9:00 AM</option>
+<option value="09:30">9:30 AM</option>
+<option value="10:00">10:00 AM</option>
+<option value="10:30">10:30 AM</option>
+<option value="11:00">11:00 AM</option>
+<option value="11:30">11:30 AM</option>
+<option value="12:00">12:00 PM</option>
+<option value="12:30">12:30 PM</option>
+<option value="13:00">1:00 PM</option>
+<option value="13:30">1:30 PM</option>
+<option value="14:00">2:00 PM</option>
+<option value="14:30">2:30 PM</option>
+<option value="15:00">3:00 PM</option>
+<option value="15:30">3:30 PM</option>
+<option value="16:00">4:00 PM</option>
+<option value="16:30">4:30 PM</option>
+<option value="17:00">5:00 PM</option>
+<option value="17:30">5:30 PM</option>
+<option value="18:00">6:00 PM</option>
+<option value="18:30">6:30 PM</option>
+<option value="19:00">7:00 PM</option>
+<option value="19:30">7:30 PM</option>
+<option value="20:00">8:00 PM</option>
+<option value="20:30">8:30 PM</option>
+<option value="21:00">9:00 PM</option>
+<option value="21:30">9:30 PM</option>
+<option value="22:00">10:00 PM</option>
+<option value="22:30">10:30 PM</option>
+<option value="23:00">11:00 PM</option>
+<option value="23:30">11:30 PM</option>
+<option value="24:00">12:00 AM (midnight)</option>
+</select>
+        </label>
+      <label class="form-field">Charter price per hour ($)<input id="availabilityPrice" type="number" min="0" step="25" placeholder="Example: 600"></label>
+      <label class="form-field">Captain included?
+        <select id="availabilityCaptainIncluded">
+          <option value="Unknown">Unknown</option>
+          <option value="Yes">Yes</option>
+          <option value="No">No</option>
+        </select>
+      </label>
+      <label class="form-field">Captain price ($)
+        <input id="availabilityCaptainPrice" type="number" min="0" step="25" placeholder="Additional captain fee">
+      </label>
+      <label class="form-field">Fuel included?
+        <select id="availabilityFuelIncluded">
+          <option value="Unknown">Unknown</option>
+          <option value="Yes">Yes</option>
+          <option value="No">No</option>
+        </select>
+      </label>
+      <label class="form-field">Operator name<input id="availabilityOperator" placeholder="Person handling the yacht or charter"></label>
+      <label class="form-field">Client / reference<input id="availabilityReference" placeholder="Optional booking or client name"></label>
+      <label class="form-field span-3">Notes<textarea id="availabilityNotes" placeholder="Optional details about the quote, availability, captain, fuel, operator, or booking"></textarea></label>
+      <div id="availabilityTotalPreview" class="availability-total">Enter the start time, end time, and hourly price.</div>
+    </div>
 
-Saved bookings
-Bookings are shown in compact columns. Open any row to see a balanced two-column detail view using both sides of the card.
-Download bookings CSV
-Search VendorAll vendors Date Status
-          All statuses
-          Inquiry
-          Confirmed
-          Rescheduled
-          Completed
-          Cancelled
-         Payment
-          All payment statuses
-          Unpaid
-          Deposit Paid
-          Paid in Full
-          Refunded
-         OperatorAll operators
-Reset booking filters
+    <div class="toolbar" style="justify-content:flex-end;margin-top:14px">
+      <button id="clearAvailabilityForm" type="button">Clear</button>
+      <button id="saveAvailability" class="primary" type="button">Save availability</button>
+    </div>
+    <div id="availabilitySaveStatus" class="save-status" aria-live="polite"></div>
+  </section>
 
-Client / Booking
-Date / Time
-Vendor / Yacht
-Total
-Status
+  <section class="card">
+    <div class="section-head">
+      <div>
+        <h3>Saved availability</h3>
+        <p>Each entry shows only the date, available time, and hourly price. Open an entry to see the remaining details.</p>
+      </div>
+      <div class="toolbar">
+        <button id="downloadAvailabilityCsv" type="button">Download availability CSV</button>
+      </div>
+    </div>
+    <div class="availability-filter-grid">
+      <label>Search<input id="availabilitySearch" placeholder="Company, yacht, client, or notes"></label>
+      <label>Company
+        <select id="availabilityCompanyFilter">
+          <option value="">All companies</option>
+        </select>
+      </label>
+      <label>Date<input id="availabilityDateFilter" type="date"></label>
+      <label>Operator
+        <select id="availabilityOperatorFilter">
+          <option value="">All operators</option>
+        </select>
+      </label>
+      <label>Status
+        <select id="availabilityStatusFilter">
+          <option value="">All statuses</option>
+          <option value="Available">Available</option>
+          <option value="Booked">Booked</option>
+          <option value="On Hold">On Hold</option>
+          <option value="Unavailable">Unavailable</option>
+        </select>
+      </label>
+    </div>
+    <div class="toolbar">
+      <button id="resetAvailabilityFilters" type="button">Reset availability filters</button>
+    </div>
+    <div id="availabilityList" class="availability-list" style="margin-top:14px"></div>
+  </section>
+</section>
 
 
-Audit Log
-Company activity history showing who changed vendors, yachts, availability, bookings, and team roles.
-Refresh audit log
-Search Module
-          All modules
-          Vendors
-          Yachts
-          Availability
-          Bookings
-          Team roles
-         Action
-          All actions
-          Created
-          Updated
-          Deleted
-         Time
-          All time
-          Today
-          Last 7 days
-          Last 30 days
-        
-No audit activity loaded yet.
+<section id="bookingDashboardView" class="booking-dashboard-shell dashboard-view hidden">
+  <section class="card">
+    <div class="booking-dashboard-hero">
+      <div>
+        <h2>Booking Dashboard</h2>
+        <p>Use the compact booking list below. Click a booking row to view every detail, or use New booking to open the editor.</p>
+      </div>
+      <button id="newMasterBooking" class="primary" type="button" style="width:auto">New booking</button>
+    </div>
+  </section>
 
-Bookings Requiring Attention
-Incomplete bookings appear in red. Open the booking to add the missing vendor, yacht, client information, date, time, pricing, or cancellation/reschedule details.
-Review next booking
+  <div id="bookingDashboardMetrics" class="booking-dashboard-metrics"></div>
 
-Search Show
-          Requires attention
-          All flagged bookings
-          Reviewed / checked off
-         Issue type
-          All issue types
-          Vendor or yacht assignment
-          Date or time
-          Client details
-          Pricing or payment
-          Cancellation or reschedule
-        
-Reset notification filters
+  <section id="masterBookingFormCard" class="card booking-editor-card hidden">
+    <div class="section-head">
+      <div>
+        <h3 id="masterBookingFormTitle">Add booking</h3>
+        <p>Confirmed and completed bookings are automatically marked as booked in the Availability Dashboard.</p>
+      </div>
+      <div class="toolbar" style="margin:0">
+        <button id="closeMasterBookingForm" type="button">Close editor</button>
+      </div>
+    </div>
 
-Vendor Dashboard
-Add and manage vendors and their yachts here. Availability and bookings are managed only in their separate dashboards.
-Add Vendor
+    <div class="booking-dashboard-form">
+      <label class="form-field">Client name<input id="masterClientName" placeholder="Client or group name"></label>
+      <label class="form-field">Client phone
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--soft);font-weight:600;white-space:nowrap">+1</span>
+          <input id="masterClientPhone" inputmode="tel" autocomplete="tel-national" placeholder="312-555-1234">
+        </div>
+        <span class="file-note">The U.S. country code +1 is added automatically.</span>
+      </label>
+      <label class="form-field">Client email<input id="masterClientEmail" type="email" placeholder="Email address"></label>
+      <label class="form-field">Booking reference<input id="masterBookingReference" placeholder="Invoice or internal reference"></label>
+      <label class="form-field">Booking entered date<input id="masterBookingEnteredDate" type="date"></label>
+      <label class="form-field">Original / imported boat name<input id="masterLegacyBoatName" placeholder="Boat name from the original booking list"></label>
+      <label class="form-field">Customer hourly rate ($)<input id="masterCustomerHourly" type="number" min="0" step="1" placeholder="Rate charged per hour"></label>
 
-Search CapacityAllUp to 1213 guests14–20 CaptainAllIncludedNot includedUnknown Vendor category
-        All categories
-        Reliable
-        Lazy
-        Top Guy
-        Expensive
-        Not categorized
-       Reliability
-        All reliability
-        Responsive
-        Slow
-        Not Reliable
-        Not rated
-       Booking history
-        All vendors
-        Has completed bookings
-        No completed bookings
-        Inquiry only
-       Sort vendors
-        Behavior: Top rated first
-        Custom order
-        Name A–Z
-        Category
-        Reliability score
-        Most completed bookings
-        Lowest yacht price
-        Highest yacht price
-        Smallest yacht first
-        Largest yacht first
-       Min size Max size Min price Max price
-Reset filters Select all shown Clear selection Send inquiry to selected (0) Download Updated DashboardDownload backup Download CSV Import backup
+      <label class="form-field">Booking date<input id="masterBookingDate" type="date"></label>
+      <label class="form-field">From time
+        <select id="masterBookingStart">
+          <option value="">Select time</option>
+<option value="08:00">8:00 AM</option>
+<option value="08:30">8:30 AM</option>
+<option value="09:00">9:00 AM</option>
+<option value="09:30">9:30 AM</option>
+<option value="10:00">10:00 AM</option>
+<option value="10:30">10:30 AM</option>
+<option value="11:00">11:00 AM</option>
+<option value="11:30">11:30 AM</option>
+<option value="12:00">12:00 PM</option>
+<option value="12:30">12:30 PM</option>
+<option value="13:00">1:00 PM</option>
+<option value="13:30">1:30 PM</option>
+<option value="14:00">2:00 PM</option>
+<option value="14:30">2:30 PM</option>
+<option value="15:00">3:00 PM</option>
+<option value="15:30">3:30 PM</option>
+<option value="16:00">4:00 PM</option>
+<option value="16:30">4:30 PM</option>
+<option value="17:00">5:00 PM</option>
+<option value="17:30">5:30 PM</option>
+<option value="18:00">6:00 PM</option>
+<option value="18:30">6:30 PM</option>
+<option value="19:00">7:00 PM</option>
+<option value="19:30">7:30 PM</option>
+<option value="20:00">8:00 PM</option>
+<option value="20:30">8:30 PM</option>
+<option value="21:00">9:00 PM</option>
+<option value="21:30">9:30 PM</option>
+<option value="22:00">10:00 PM</option>
+<option value="22:30">10:30 PM</option>
+<option value="23:00">11:00 PM</option>
+<option value="23:30">11:30 PM</option>
+        </select>
+      </label>
+      <label class="form-field">To time
+        <select id="masterBookingEnd">
+          <option value="">Select time</option>
+<option value="08:30">8:30 AM</option>
+<option value="09:00">9:00 AM</option>
+<option value="09:30">9:30 AM</option>
+<option value="10:00">10:00 AM</option>
+<option value="10:30">10:30 AM</option>
+<option value="11:00">11:00 AM</option>
+<option value="11:30">11:30 AM</option>
+<option value="12:00">12:00 PM</option>
+<option value="12:30">12:30 PM</option>
+<option value="13:00">1:00 PM</option>
+<option value="13:30">1:30 PM</option>
+<option value="14:00">2:00 PM</option>
+<option value="14:30">2:30 PM</option>
+<option value="15:00">3:00 PM</option>
+<option value="15:30">3:30 PM</option>
+<option value="16:00">4:00 PM</option>
+<option value="16:30">4:30 PM</option>
+<option value="17:00">5:00 PM</option>
+<option value="17:30">5:30 PM</option>
+<option value="18:00">6:00 PM</option>
+<option value="18:30">6:30 PM</option>
+<option value="19:00">7:00 PM</option>
+<option value="19:30">7:30 PM</option>
+<option value="20:00">8:00 PM</option>
+<option value="20:30">8:30 PM</option>
+<option value="21:00">9:00 PM</option>
+<option value="21:30">9:30 PM</option>
+<option value="22:00">10:00 PM</option>
+<option value="22:30">10:30 PM</option>
+<option value="23:00">11:00 PM</option>
+<option value="23:30">11:30 PM</option>
+<option value="24:00">12:00 AM (midnight)</option>
+        </select>
+      </label>
+      <label class="form-field">Guest count<input id="masterGuestCount" type="number" min="1" placeholder="Number of guests"></label>
 
-Add vendor
-Add the vendor’s contact information first, then add one or more yachts below.
-Save changes Close
-Vendor contact information
-Basic details used to contact and identify the vendor.
-Vendor name Phone
-+1
+      <label class="form-field">Assigned vendor
+        <select id="masterBookingVendor"><option value="">Select vendor</option></select>
+      </label>
+      <label class="form-field">Assigned yacht
+        <select id="masterBookingYacht"><option value="">Select vendor first</option></select>
+      </label>
+      <label class="form-field">Operator name<input id="masterBookingOperator" placeholder="Person handling the booking"></label>
+      <label class="form-field">Booking status
+        <select id="masterBookingStatus">
+          <option value="Inquiry">Inquiry</option>
+          <option value="Confirmed">Confirmed</option>
+          <option value="Rescheduled">Rescheduled</option>
+          <option value="Completed">Completed</option>
+          <option value="Cancelled">Cancelled</option>
+        </select>
+      </label>
+      <label class="form-field">Client change
+        <select id="masterClientChange">
+          <option value="No change">No change</option>
+          <option value="Rescheduled">Rescheduled</option>
+          <option value="Cancelled">Cancelled</option>
+        </select>
+      </label>
+      <label class="form-field span-3">Cancellation / reschedule reason
+        <input id="masterChangeReason" placeholder="Optional reason or client request">
+      </label>
 
-The U.S. country code +1 is added automatically. Email Website Vendor category
-            Not categorized
-            Reliable
-            Lazy
-            Top Guy
-            Expensive
-           Custom order Lower numbers appear first when sorted by Custom order.
-Captain and boarding details
-Choose the vendor’s captain details and usual Chicago boarding location.
-Captain included
-            Unknown
-            Yes
-            No
-           Captain price
-            Not selected
-            $100
-            $125
-            $150
-           Captain name Boarding location
-    Select boarding location
-    31st Street Harbor
-    Diversey Harbor
-    Navy Pier
-    Burnham Harbor
-    Belmont Harbor
-    DuSable Harbor
-  
-Reliability scorecard and booking history
-Track responsiveness, completed bookings, and the vendor’s behavior during each booking.
-Reliability
-            Not rated
-            Responsive
-            Slow
-            Not Reliable
-           Overall behavior
-            Top Rated
-            Good
-            Average
-            Poor
-            Problem
-            Not rated
-           This rating controls the default vendor order. Booking relationship
-            No booking yet
-            Inquiry only
-            Booked before
-           Completed bookings You may enter the total directly. Completed log entries also update it.
-Add booking experience
-Booking date Yacht Not specified Booking status
-              Completed
-              Pending
-              Cancelled
-             Vendor behavior
-              Not rated
-              Excellent
-              Good
-              Average
-              Poor
-              Problem
-             Booking reference / client Notes
-Cancel edit Add booking experience
+      <div id="masterOriginalSchedulePanel" class="form-section hidden" style="grid-column:1/-1">
+        <div class="section-head">
+          <div>
+            <h3>Original schedule</h3>
+            <p>The current booking date and time above become the new schedule. These fields preserve the previous schedule.</p>
+          </div>
+        </div>
+        <div class="booking-dashboard-form">
+          <label class="form-field">Original date<input id="masterOriginalDate" type="date"></label>
+          <label class="form-field">Original from time
+            <select id="masterOriginalStart">
+              <option value="">Select time</option>
+<option value="08:00">8:00 AM</option>
+<option value="08:30">8:30 AM</option>
+<option value="09:00">9:00 AM</option>
+<option value="09:30">9:30 AM</option>
+<option value="10:00">10:00 AM</option>
+<option value="10:30">10:30 AM</option>
+<option value="11:00">11:00 AM</option>
+<option value="11:30">11:30 AM</option>
+<option value="12:00">12:00 PM</option>
+<option value="12:30">12:30 PM</option>
+<option value="13:00">1:00 PM</option>
+<option value="13:30">1:30 PM</option>
+<option value="14:00">2:00 PM</option>
+<option value="14:30">2:30 PM</option>
+<option value="15:00">3:00 PM</option>
+<option value="15:30">3:30 PM</option>
+<option value="16:00">4:00 PM</option>
+<option value="16:30">4:30 PM</option>
+<option value="17:00">5:00 PM</option>
+<option value="17:30">5:30 PM</option>
+<option value="18:00">6:00 PM</option>
+<option value="18:30">6:30 PM</option>
+<option value="19:00">7:00 PM</option>
+<option value="19:30">7:30 PM</option>
+<option value="20:00">8:00 PM</option>
+<option value="20:30">8:30 PM</option>
+<option value="21:00">9:00 PM</option>
+<option value="21:30">9:30 PM</option>
+<option value="22:00">10:00 PM</option>
+<option value="22:30">10:30 PM</option>
+<option value="23:00">11:00 PM</option>
+<option value="23:30">11:30 PM</option>
+            </select>
+          </label>
+          <label class="form-field">Original to time
+            <select id="masterOriginalEnd">
+              <option value="">Select time</option>
+<option value="08:30">8:30 AM</option>
+<option value="09:00">9:00 AM</option>
+<option value="09:30">9:30 AM</option>
+<option value="10:00">10:00 AM</option>
+<option value="10:30">10:30 AM</option>
+<option value="11:00">11:00 AM</option>
+<option value="11:30">11:30 AM</option>
+<option value="12:00">12:00 PM</option>
+<option value="12:30">12:30 PM</option>
+<option value="13:00">1:00 PM</option>
+<option value="13:30">1:30 PM</option>
+<option value="14:00">2:00 PM</option>
+<option value="14:30">2:30 PM</option>
+<option value="15:00">3:00 PM</option>
+<option value="15:30">3:30 PM</option>
+<option value="16:00">4:00 PM</option>
+<option value="16:30">4:30 PM</option>
+<option value="17:00">5:00 PM</option>
+<option value="17:30">5:30 PM</option>
+<option value="18:00">6:00 PM</option>
+<option value="18:30">6:30 PM</option>
+<option value="19:00">7:00 PM</option>
+<option value="19:30">7:30 PM</option>
+<option value="20:00">8:00 PM</option>
+<option value="20:30">8:30 PM</option>
+<option value="21:00">9:00 PM</option>
+<option value="21:30">9:30 PM</option>
+<option value="22:00">10:00 PM</option>
+<option value="22:30">10:30 PM</option>
+<option value="23:00">11:00 PM</option>
+<option value="23:30">11:30 PM</option>
+<option value="24:00">12:00 AM (midnight)</option>
+            </select>
+          </label>
+        </div>
+      </div>
 
+      <label class="form-field">Customer total price ($)<input id="masterCustomerTotal" type="number" min="0" step="25" placeholder="Total charged to client"></label>
+      <label class="form-field">Vendor price per hour ($)<input id="masterVendorHourly" type="number" min="0" step="25" placeholder="Vendor hourly cost"></label>
+      <label class="form-field">Deposit paid ($)<input id="masterDepositPaid" type="number" min="0" step="25" placeholder="Deposit received"></label>
+      <label class="form-field">Payment status
+        <select id="masterPaymentStatus">
+          <option value="Unpaid">Unpaid</option>
+          <option value="Deposit Paid">Deposit Paid</option>
+          <option value="Paid in Full">Paid in Full</option>
+          <option value="Refunded">Refunded</option>
+        </select>
+      </label>
 
-Vendor pictures and notes
-The profile picture is used when a yacht does not have its own picture.
-Vendor profile picture Large photos are automatically resized and compressed. Other vendor pictures Select multiple images. They are saved in the larger photo database. Vendor notes
-Yachts for this vendor
-Add each yacht separately so price and length filters work correctly.
-Add another yacht
+      <label class="form-field">Captain included?
+        <select id="masterCaptainIncluded">
+          <option value="Unknown">Unknown</option>
+          <option value="Yes">Yes</option>
+          <option value="No">No</option>
+        </select>
+      </label>
+      <label class="form-field">Captain price ($)<input id="masterCaptainPrice" type="number" min="0" step="25" placeholder="Additional captain cost"></label>
+      <label class="form-field">Fuel included?
+        <select id="masterFuelIncluded">
+          <option value="Unknown">Unknown</option>
+          <option value="Yes">Yes</option>
+          <option value="No">No</option>
+        </select>
+      </label>
+      <label class="form-field">Boarding location
+        <select id="masterBoardingLocation">
+          <option value="">Select boarding location</option>
+          <option value="31st Street Harbor">31st Street Harbor</option>
+          <option value="Diversey Harbor">Diversey Harbor</option>
+          <option value="Navy Pier">Navy Pier</option>
+          <option value="Burnham Harbor">Burnham Harbor</option>
+          <option value="Belmont Harbor">Belmont Harbor</option>
+          <option value="DuSable Harbor">DuSable Harbor</option>
+        </select>
+      </label>
 
-Add yacht
-Yacht name or model Capacity Length (ft) Hourly price ($) Category Yacht website / booking link Leave blank to use the vendor’s main website. Overall availability
-              Unknown
-              Available
-              Limited
-              Booked
-              Not Responding
-             Yacht profile picture This picture appears first and is automatically compressed. Other yacht pictures
+      <label class="form-field">Vendor behavior
+        <select id="masterVendorBehavior">
+          <option value="Not rated">Not rated</option>
+              <option value="Excellent">Excellent</option>
+          <option value="Good">Good</option>
+          <option value="Average">Average</option>
+          <option value="Poor">Poor</option>
+          <option value="Problem">Problem</option>
+        </select>
+      </label>
+      <label class="form-field span-3">Booking notes<textarea id="masterBookingNotes" placeholder="Client requests, payment notes, captain details, or operational instructions"></textarea></label>
+      <div id="masterBookingTotalPreview" class="booking-total-box">Enter the time, customer price, and vendor cost.</div>
+    </div>
 
-Yacht notes
-Availability time slots
-Add separate available, booked, on-hold, or unavailable time periods.
-Date From
-Select time
-8:00 AM
-8:30 AM
-9:00 AM
-9:30 AM
-10:00 AM
-10:30 AM
-11:00 AM
-11:30 AM
-12:00 PM
-12:30 PM
-1:00 PM
-1:30 PM
-2:00 PM
-2:30 PM
-3:00 PM
-3:30 PM
-4:00 PM
-4:30 PM
-5:00 PM
-5:30 PM
-6:00 PM
-6:30 PM
-7:00 PM
-7:30 PM
-8:00 PM
-8:30 PM
-9:00 PM
-9:30 PM
-10:00 PM
-10:30 PM
-11:00 PM
-11:30 PM
-To
-Select time
-8:30 AM
-9:00 AM
-9:30 AM
-10:00 AM
-10:30 AM
-11:00 AM
-11:30 AM
-12:00 PM
-12:30 PM
-1:00 PM
-1:30 PM
-2:00 PM
-2:30 PM
-3:00 PM
-3:30 PM
-4:00 PM
-4:30 PM
-5:00 PM
-5:30 PM
-6:00 PM
-6:30 PM
-7:00 PM
-7:30 PM
-8:00 PM
-8:30 PM
-9:00 PM
-9:30 PM
-10:00 PM
-10:30 PM
-11:00 PM
-11:30 PM
-12:00 AM (midnight)
-Status
-                Available
-                Booked
-                On Hold
-                Unavailable
-               Note
-Add time slot
+    <div id="masterBookingConflict" class="booking-conflict hidden"></div>
+    <div class="toolbar" style="justify-content:flex-end;margin-top:14px">
+      <button id="clearMasterBooking" type="button">Cancel</button>
+      <button id="saveMasterBooking" class="primary" type="button">Save booking</button>
+    </div>
+    <div id="masterBookingSaveStatus" class="save-status" aria-live="polite"></div>
+  </section>
 
-Cancel yacht edit Save yacht changes
+  <section id="bookingListSection" class="card">
+    <div class="section-head">
+      <div>
+        <h3>Saved bookings</h3>
+        <p>Bookings are shown in compact columns. Open any row to see a balanced two-column detail view using both sides of the card.</p>
+      </div>
+      <div class="toolbar">
+        <button id="downloadBookingsCsv" type="button">Download bookings CSV</button>
+      </div>
+    </div>
 
-
-Cancel Save vendor and close
-Send availability inquiry
-
-Date From
-Select time
-8:00 AM
-8:30 AM
-9:00 AM
-9:30 AM
-10:00 AM
-10:30 AM
-11:00 AM
-11:30 AM
-12:00 PM
-12:30 PM
-1:00 PM
-1:30 PM
-2:00 PM
-2:30 PM
-3:00 PM
-3:30 PM
-4:00 PM
-4:30 PM
-5:00 PM
-5:30 PM
-6:00 PM
-6:30 PM
-7:00 PM
-7:30 PM
-8:00 PM
-8:30 PM
-9:00 PM
-9:30 PM
-10:00 PM
-10:30 PM
-11:00 PM
-11:30 PM
-To
-Select time
-8:30 AM
-9:00 AM
-9:30 AM
-10:00 AM
-10:30 AM
-11:00 AM
-11:30 AM
-12:00 PM
-12:30 PM
-1:00 PM
-1:30 PM
-2:00 PM
-2:30 PM
-3:00 PM
-3:30 PM
-4:00 PM
-4:30 PM
-5:00 PM
-5:30 PM
-6:00 PM
-6:30 PM
-7:00 PM
-7:30 PM
-8:00 PM
-8:30 PM
-9:00 PM
-9:30 PM
-10:00 PM
-10:30 PM
-11:00 PM
-11:30 PM
-12:00 AM (midnight)
-Guests Editable message
-Use default message Prepare / open text Copy message Copy phone Skip vendor Close
+    <div class="booking-dashboard-filter">
+      <label>Search<input id="masterBookingSearch" placeholder="Client, vendor, yacht, reference, or notes"></label>
+      <label>Vendor<select id="masterBookingVendorFilter"><option value="">All vendors</option></select></label>
+      <label>Date<input id="masterBookingDateFilter" type="date"></label>
+      <label>Status
+        <select id="masterBookingStatusFilter">
+          <option value="">All statuses</option>
+          <option value="Inquiry">Inquiry</option>
+          <option value="Confirmed">Confirmed</option>
+          <option value="Rescheduled">Rescheduled</option>
+          <option value="Completed">Completed</option>
+          <option value="Cancelled">Cancelled</option>
+        </select>
+      </label>
+      <label>Payment
+        <select id="masterPaymentStatusFilter">
+          <option value="">All payment statuses</option>
+          <option value="Unpaid">Unpaid</option>
+          <option value="Deposit Paid">Deposit Paid</option>
+          <option value="Paid in Full">Paid in Full</option>
+          <option value="Refunded">Refunded</option>
+        </select>
+      </label>
+      <label>Operator<select id="masterBookingOperatorFilter"><option value="">All operators</option></select></label>
+    </div>
+    <div class="toolbar">
+      <button id="resetMasterBookingFilters" type="button">Reset booking filters</button>
+    </div>
+    <div id="bookingListSaveBanner" class="booking-save-banner hidden" aria-live="polite"></div>
+    <div class="booking-list-header" aria-hidden="true">
+      <div>Client / Booking</div>
+      <div>Date / Time</div>
+      <div>Vendor / Yacht</div>
+      <div>Total</div>
+      <div>Status</div>
+      <div></div>
+    </div>
+    <div id="masterBookingList" class="booking-list"></div>
+  </section>
+</section>
 
 
-iPhone/iPad: the recipient opens in Messages and the message is copied for pasting. Mac: the message is copied without launching an unreliable browser SMS link; use Copy phone and paste both into Messages. Android: the text app opens with the message prepared.
 
-Vendor directory
+<section id="auditDashboardView" class="dashboard-view hidden">
+  <section class="card">
+    <div class="section-head">
+      <div>
+        <h2>Audit Log</h2>
+        <p>Company activity history showing who changed vendors, yachts, availability, bookings, and team roles.</p>
+      </div>
+      <button id="refreshAuditLog" type="button">Refresh audit log</button>
+    </div>
+  </section>
 
+  <section class="card">
+    <div class="filter-grid audit-filter-grid">
+      <label>Search
+        <input id="auditSearch" placeholder="User, record, action, module">
+      </label>
+      <label>Module
+        <select id="auditModuleFilter">
+          <option value="">All modules</option>
+          <option value="vendors">Vendors</option>
+          <option value="yachts">Yachts</option>
+          <option value="availability">Availability</option>
+          <option value="bookings">Bookings</option>
+          <option value="user_profiles">Team roles</option>
+        </select>
+      </label>
+      <label>Action
+        <select id="auditActionFilter">
+          <option value="">All actions</option>
+          <option value="INSERT">Created</option>
+          <option value="UPDATE">Updated</option>
+          <option value="DELETE">Deleted</option>
+        </select>
+      </label>
+      <label>Time
+        <select id="auditTimeFilter">
+          <option value="all">All time</option>
+          <option value="today">Today</option>
+          <option value="7">Last 7 days</option>
+          <option value="30">Last 30 days</option>
+        </select>
+      </label>
+    </div>
+  </section>
 
+  <section class="card">
+    <div id="auditSummary" class="note">No audit activity loaded yet.</div>
+    <div id="auditLogList" class="audit-list"></div>
+  </section>
+</section>
+
+<section id="notificationsDashboardView" class="notification-shell dashboard-view hidden">
+  <section class="card">
+    <div class="notification-hero">
+      <div>
+        <h2>Bookings Requiring Attention</h2>
+        <p>Incomplete bookings appear in red. Open the booking to add the missing vendor, yacht, client information, date, time, pricing, or cancellation/reschedule details.</p>
+      </div>
+      <button id="reviewNextNotification" class="primary" type="button" style="width:auto">Review next booking</button>
+    </div>
+  </section>
+
+  <div id="notificationMetrics" class="notification-metrics"></div>
+
+  <section class="card">
+    <div class="notification-filter-grid">
+      <label>Search
+        <input id="notificationSearch" placeholder="Client, boat, reference, vendor, or missing detail">
+      </label>
+      <label>Show
+        <select id="notificationStatusFilter">
+          <option value="unresolved">Requires attention</option>
+          <option value="all">All flagged bookings</option>
+          <option value="resolved">Reviewed / checked off</option>
+        </select>
+      </label>
+      <label>Issue type
+        <select id="notificationIssueFilter">
+          <option value="">All issue types</option>
+          <option value="assignment">Vendor or yacht assignment</option>
+          <option value="time">Date or time</option>
+          <option value="client">Client details</option>
+          <option value="financial">Pricing or payment</option>
+          <option value="change">Cancellation or reschedule</option>
+        </select>
+      </label>
+    </div>
+    <div class="toolbar">
+      <button id="resetNotificationFilters" type="button">Reset notification filters</button>
+    </div>
+    <div id="notificationList" class="notification-list" style="margin-top:14px"></div>
+  </section>
+</section>
+
+<div id="vendorDashboardView" class="dashboard-view">
+<section class="card vendor-dashboard-hero">
+  <div>
+    <h2>Vendor Dashboard</h2>
+    <p>Add and manage vendors and their yachts here. Availability and bookings are managed only in their separate dashboards.</p>
+  </div>
+  <button id="addVendor" class="primary" type="button">Add Vendor</button>
+</section>
+<div id="metrics" class="metrics"></div>
+
+<section class="card">
+  <div class="controls">
+    <label>Search<input id="search" placeholder="Vendor, reliability, behavior, yacht, phone, captain, location"></label>
+    <label>Capacity<select id="capacity"><option value="">All</option><option value="12">Up to 12</option><option value="13">13 guests</option><option value="20">14–20</option></select></label>
+    <label>Captain<select id="captainFilter"><option value="">All</option><option value="Yes">Included</option><option value="No">Not included</option><option value="Unknown">Unknown</option></select></label>
+    <label>Vendor category
+      <select id="vendorCategoryFilter">
+        <option value="">All categories</option>
+        <option value="Reliable">Reliable</option>
+        <option value="Lazy">Lazy</option>
+        <option value="Top Guy">Top Guy</option>
+        <option value="Expensive">Expensive</option>
+        <option value="Not categorized">Not categorized</option>
+      </select>
+    </label>
+    <label>Reliability
+      <select id="reliabilityFilter">
+        <option value="">All reliability</option>
+        <option value="Responsive">Responsive</option>
+        <option value="Slow">Slow</option>
+        <option value="Not Reliable">Not Reliable</option>
+        <option value="Not rated">Not rated</option>
+      </select>
+    </label>
+    <label>Booking history
+      <select id="bookingFilter">
+        <option value="">All vendors</option>
+        <option value="has-bookings">Has completed bookings</option>
+        <option value="no-bookings">No completed bookings</option>
+        <option value="inquiry-only">Inquiry only</option>
+      </select>
+    </label>
+    <label>Sort vendors
+      <select id="sortVendors">
+        <option value="behavior-best" selected>Behavior: Top rated first</option>
+        <option value="custom">Custom order</option>
+        <option value="name-asc">Name A–Z</option>
+        <option value="category">Category</option>
+        <option value="reliability">Reliability score</option>
+        <option value="bookings-desc">Most completed bookings</option>
+        <option value="price-asc">Lowest yacht price</option>
+        <option value="price-desc">Highest yacht price</option>
+        <option value="length-asc">Smallest yacht first</option>
+        <option value="length-desc">Largest yacht first</option>
+      </select>
+    </label>
+    <label>Min size<input id="minSize" type="number" placeholder="ft"></label>
+    <label>Max size<input id="maxSize" type="number" placeholder="ft"></label>
+    <label>Min price<input id="minPrice" type="number" placeholder="$/hr"></label>
+    <label>Max price<input id="maxPrice" type="number" placeholder="$/hr"></label>
+  </div>
+  <div class="toolbar">
+    <button id="reset">Reset filters</button>
+    <button id="selectShown">Select all shown</button>
+    <button id="clearSelection">Clear selection</button>
+    <button id="openInquiry" class="primary">Send inquiry to selected (0)</button>
+    <button id="downloadUpdatedDashboard" class="primary">Download Updated Dashboard</button><button id="downloadBackup">Download backup</button>
+    <button id="downloadCsv">Download CSV</button>
+    <button id="importBackup">Import backup</button>
+    <input id="backupFile" class="hidden" type="file" accept=".json">
+  </div>
+</section>
+
+<div id="editorHome"></div>
+<section id="editor" class="editor-shell hidden">
+  <div class="editor-header">
+    <div>
+      <h2 id="editorTitle">Add vendor</h2>
+      <p>Add the vendor’s contact information first, then add one or more yachts below.</p>
+    </div>
+    <div class="toolbar" style="margin:0">
+      <button id="saveVendorTop" class="primary" type="button">Save changes</button>
+      <button id="cancelEditorTop" type="button">Close</button>
+    </div>
+  </div>
+
+  <div class="editor-body">
+    <section class="form-section">
+      <div class="section-head">
+        <div>
+          <h3>Vendor contact information</h3>
+          <p>Basic details used to contact and identify the vendor.</p>
+        </div>
+      </div>
+      <div class="formgrid">
+        <label class="form-field">Vendor name<input id="fName" placeholder="Vendor or company name"></label>
+        <label class="form-field">Phone
+  <div style="display:flex;align-items:center;gap:8px">
+    <span style="padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--soft);font-weight:600;white-space:nowrap">+1</span>
+    <input id="fPhone" inputmode="tel" autocomplete="tel-national" placeholder="312-555-1234">
+  </div>
+  <span class="file-note">The U.S. country code +1 is added automatically.</span>
+</label>
+        <label class="form-field">Email<input id="fEmail" type="email" placeholder="vendor@example.com"></label>
+        <label class="form-field">Website<input id="fWebsite" type="url" placeholder="https://"></label>
+        <label class="form-field">Vendor category
+          <select id="fVendorCategory">
+            <option value="Not categorized">Not categorized</option>
+            <option value="Reliable">Reliable</option>
+            <option value="Lazy">Lazy</option>
+            <option value="Top Guy">Top Guy</option>
+            <option value="Expensive">Expensive</option>
+          </select>
+        </label>
+        <label class="form-field">Custom order
+          <input id="fSortOrder" type="number" min="1" step="1" placeholder="Example: 1">
+          <span class="file-note">Lower numbers appear first when sorted by Custom order.</span>
+        </label>
+      </div>
+    </section>
+
+    <section class="form-section soft">
+      <div class="section-head">
+        <div>
+          <h3>Captain and boarding details</h3>
+          <p>Choose the vendor’s captain details and usual Chicago boarding location.</p>
+        </div>
+      </div>
+      <div class="formgrid">
+        <label class="form-field">Captain included
+          <select id="fCaptainIncluded">
+            <option>Unknown</option>
+            <option>Yes</option>
+            <option>No</option>
+          </select>
+        </label>
+        <label class="form-field">Captain price
+          <select id="fCaptainPrice">
+            <option value="">Not selected</option>
+            <option value="100">$100</option>
+            <option value="125">$125</option>
+            <option value="150">$150</option>
+          </select>
+        </label>
+        <label class="form-field">Captain name<input id="fCaptainName" placeholder="Captain’s name"></label>
+        <label class="form-field">Boarding location
+  <select id="fBoarding">
+    <option value="">Select boarding location</option>
+    <option value="31st Street Harbor">31st Street Harbor</option>
+    <option value="Diversey Harbor">Diversey Harbor</option>
+    <option value="Navy Pier">Navy Pier</option>
+    <option value="Burnham Harbor">Burnham Harbor</option>
+    <option value="Belmont Harbor">Belmont Harbor</option>
+    <option value="DuSable Harbor">DuSable Harbor</option>
+  </select>
+</label>
+      </div>
+    </section>
+
+    <section class="form-section">
+      <div class="section-head">
+        <div>
+          <h3>Reliability scorecard and booking history</h3>
+          <p>Track responsiveness, completed bookings, and the vendor’s behavior during each booking.</p>
+        </div>
+      </div>
+      <div class="formgrid three">
+        <label class="form-field">Reliability
+          <select id="fReliability">
+            <option value="Not rated">Not rated</option>
+            <option value="Responsive">Responsive</option>
+            <option value="Slow">Slow</option>
+            <option value="Not Reliable">Not Reliable</option>
+          </select>
+        </label>
+        <label class="form-field">Overall behavior
+          <select id="fOverallBehavior">
+            <option value="Top Rated">Top Rated</option>
+            <option value="Good">Good</option>
+            <option value="Average">Average</option>
+            <option value="Poor">Poor</option>
+            <option value="Problem">Problem</option>
+            <option value="Not rated">Not rated</option>
+          </select>
+          <span class="file-note">This rating controls the default vendor order.</span>
+        </label>
+        <label class="form-field">Booking relationship
+          <select id="fBookingRelationship">
+            <option value="No booking yet">No booking yet</option>
+            <option value="Inquiry only">Inquiry only</option>
+            <option value="Booked before">Booked before</option>
+          </select>
+        </label>
+        <label class="form-field">Completed bookings
+          <input id="fCompletedBookings" type="number" min="0" step="1" value="0">
+          <span class="file-note">You may enter the total directly. Completed log entries also update it.</span>
+        </label>
+      </div>
+
+      <div class="yacht-editor-panel" style="margin-top:16px">
+        <h3 id="bookingEditorTitle">Add booking experience</h3>
+        <div class="formgrid three">
+          <label class="form-field">Booking date<input id="bookingDate" type="date"></label>
+          <label class="form-field">Yacht
+            <select id="bookingYacht"><option value="">Not specified</option></select>
+          </label>
+          <label class="form-field">Booking status
+            <select id="bookingStatus">
+              <option value="Completed">Completed</option>
+              <option value="Pending">Pending</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+          </label>
+          <label class="form-field">Vendor behavior
+            <select id="bookingBehavior">
+              <option value="Not rated">Not rated</option>
+              <option value="Excellent">Excellent</option>
+              <option value="Good">Good</option>
+              <option value="Average">Average</option>
+              <option value="Poor">Poor</option>
+              <option value="Problem">Problem</option>
+            </select>
+          </label>
+          <label class="form-field">Booking reference / client<input id="bookingReference" placeholder="Optional reference or client name"></label>
+          <label class="form-field">Notes<input id="bookingNotes" placeholder="Communication, punctuality, service, issues, etc."></label>
+        </div>
+        <div class="toolbar" style="justify-content:flex-end">
+          <button id="cancelBookingEdit" type="button" class="hidden">Cancel edit</button>
+          <button id="saveBookingEntry" type="button" class="primary">Add booking experience</button>
+        </div>
+        <div id="bookingSaveStatus" class="save-status" aria-live="polite"></div>
+      </div>
+      <div id="bookingList" class="booking-list"></div>
+    </section>
+
+    <section class="form-section">
+      <div class="section-head">
+        <div>
+          <h3>Vendor pictures and notes</h3>
+          <p>The profile picture is used when a yacht does not have its own picture.</p>
+        </div>
+      </div>
+      <div class="formgrid">
+        <label class="form-field">Vendor profile picture
+          <input id="fVendorProfile" type="file" accept="image/*">
+          <span class="file-note">Large photos are automatically resized and compressed.</span>
+        </label>
+        <label class="form-field">Other vendor pictures
+          <input id="fVendorGallery" type="file" accept="image/*" multiple>
+          <span class="file-note">Select multiple images. They are saved in the larger photo database.</span>
+        </label>
+        <label class="form-field span-2">Vendor notes
+          <textarea id="fNotes" placeholder="Internal notes, policies, contact preferences, or other details"></textarea>
+        </label>
+      </div>
+    </section>
+
+    <section class="form-section soft">
+      <div class="section-head">
+        <div>
+          <h3>Yachts for this vendor</h3>
+          <p>Add each yacht separately so price and length filters work correctly.</p>
+        </div>
+        <div class="toolbar">
+          <button id="newYacht" type="button" class="primary">Add another yacht</button>
+        </div>
+      </div>
+
+      <div id="yachtList" class="yacht-list"></div>
+
+      <div id="yachtEditor" class="yacht-editor-panel hidden">
+        <h3 id="yachtEditorTitle">Add yacht</h3>
+
+        <div class="formgrid three">
+          <label class="form-field span-2">Yacht name or model
+            <input id="yName" placeholder="Example: 50 ft Azimut">
+          </label>
+          <label class="form-field">Capacity<input id="yCapacity" type="number" min="0" placeholder="Guests"></label>
+          <label class="form-field">Length (ft)<input id="yLength" type="number" min="0" placeholder="Feet"></label>
+          <label class="form-field">Hourly price ($)<input id="yPrice" type="number" min="0" placeholder="Hourly rate"></label>
+          <label class="form-field">Category<input id="yCategory" placeholder="Example: Double - Medium"></label>
+          <label class="form-field span-2">Yacht website / booking link
+            <input id="yWebsite" type="url" placeholder="https://">
+            <span class="file-note">Leave blank to use the vendor’s main website.</span>
+          </label>
+          <label class="form-field">Overall availability
+            <select id="yAvailability">
+              <option>Unknown</option>
+              <option>Available</option>
+              <option>Limited</option>
+              <option>Booked</option>
+              <option>Not Responding</option>
+            </select>
+          </label>
+          <label class="form-field">Yacht profile picture
+            <input id="yProfile" type="file" accept="image/*">
+            <span class="file-note">This picture appears first and is automatically compressed.</span>
+          </label>
+          <label class="form-field">Other yacht pictures
+            <input id="yGallery" type="file" accept="image/*" multiple>
+          </label>
+          <div id="yachtPhotoPreview" class="photo-preview span-3"></div>
+          <label class="form-field span-3">Yacht notes
+            <textarea id="yNotes" placeholder="Amenities, condition, rules, price details, or other yacht-specific notes"></textarea>
+          </label>
+        </div>
+
+        <div class="availability-panel">
+          <div class="section-head">
+            <div>
+              <h3>Availability time slots</h3>
+              <p>Add separate available, booked, on-hold, or unavailable time periods.</p>
+            </div>
+          </div>
+          <div class="formgrid three">
+            <label class="form-field">Date<input id="slotDate" type="date"></label>
+            <label class="form-field">From
+              <select id="slotStart">
+<option value="">Select time</option>
+<option value="08:00">8:00 AM</option>
+<option value="08:30">8:30 AM</option>
+<option value="09:00">9:00 AM</option>
+<option value="09:30">9:30 AM</option>
+<option value="10:00">10:00 AM</option>
+<option value="10:30">10:30 AM</option>
+<option value="11:00">11:00 AM</option>
+<option value="11:30">11:30 AM</option>
+<option value="12:00">12:00 PM</option>
+<option value="12:30">12:30 PM</option>
+<option value="13:00">1:00 PM</option>
+<option value="13:30">1:30 PM</option>
+<option value="14:00">2:00 PM</option>
+<option value="14:30">2:30 PM</option>
+<option value="15:00">3:00 PM</option>
+<option value="15:30">3:30 PM</option>
+<option value="16:00">4:00 PM</option>
+<option value="16:30">4:30 PM</option>
+<option value="17:00">5:00 PM</option>
+<option value="17:30">5:30 PM</option>
+<option value="18:00">6:00 PM</option>
+<option value="18:30">6:30 PM</option>
+<option value="19:00">7:00 PM</option>
+<option value="19:30">7:30 PM</option>
+<option value="20:00">8:00 PM</option>
+<option value="20:30">8:30 PM</option>
+<option value="21:00">9:00 PM</option>
+<option value="21:30">9:30 PM</option>
+<option value="22:00">10:00 PM</option>
+<option value="22:30">10:30 PM</option>
+<option value="23:00">11:00 PM</option>
+<option value="23:30">11:30 PM</option>
+</select>
+            </label>
+            <label class="form-field">To
+              <select id="slotEnd">
+<option value="">Select time</option>
+<option value="08:30">8:30 AM</option>
+<option value="09:00">9:00 AM</option>
+<option value="09:30">9:30 AM</option>
+<option value="10:00">10:00 AM</option>
+<option value="10:30">10:30 AM</option>
+<option value="11:00">11:00 AM</option>
+<option value="11:30">11:30 AM</option>
+<option value="12:00">12:00 PM</option>
+<option value="12:30">12:30 PM</option>
+<option value="13:00">1:00 PM</option>
+<option value="13:30">1:30 PM</option>
+<option value="14:00">2:00 PM</option>
+<option value="14:30">2:30 PM</option>
+<option value="15:00">3:00 PM</option>
+<option value="15:30">3:30 PM</option>
+<option value="16:00">4:00 PM</option>
+<option value="16:30">4:30 PM</option>
+<option value="17:00">5:00 PM</option>
+<option value="17:30">5:30 PM</option>
+<option value="18:00">6:00 PM</option>
+<option value="18:30">6:30 PM</option>
+<option value="19:00">7:00 PM</option>
+<option value="19:30">7:30 PM</option>
+<option value="20:00">8:00 PM</option>
+<option value="20:30">8:30 PM</option>
+<option value="21:00">9:00 PM</option>
+<option value="21:30">9:30 PM</option>
+<option value="22:00">10:00 PM</option>
+<option value="22:30">10:30 PM</option>
+<option value="23:00">11:00 PM</option>
+<option value="23:30">11:30 PM</option>
+<option value="24:00">12:00 AM (midnight)</option>
+</select>
+            </label>
+            <label class="form-field">Status
+              <select id="slotStatus">
+                <option>Available</option>
+                <option>Booked</option>
+                <option>On Hold</option>
+                <option>Unavailable</option>
+              </select>
+            </label>
+            <label class="form-field span-2">Note<input id="slotNote" placeholder="Optional booking or customer note"></label>
+          </div>
+          <div class="toolbar">
+            <button id="addSlot" type="button">Add time slot</button>
+          </div>
+          <div id="slotList" class="note"></div>
+        </div>
+
+        <div class="toolbar" style="justify-content:flex-end;margin-top:16px">
+          <button id="cancelYacht" type="button">Cancel yacht edit</button>
+          <button id="saveYacht" class="primary" type="button">Save yacht changes</button>
+        </div>
+        <div id="yachtSaveStatus" class="save-status" aria-live="polite"></div>
+      </div>
+    </section>
+  </div>
+
+  <div id="vendorSaveStatus" class="save-status" style="padding:0 20px" aria-live="polite"></div>
+  <div class="editor-actions">
+    <button id="cancelEditor" type="button">Cancel</button>
+    <button id="saveVendor" class="primary" type="button">Save vendor and close</button>
+  </div>
+</section>
+
+<section id="inquiryPanel" class="card hidden" style="margin-top:14px">
+  <h2>Send availability inquiry</h2>
+  <div id="selectedSummary" class="note"></div>
+  <div class="formgrid">
+    <label>Date<input id="qDate" type="date"></label>
+    <label>From
+      <select id="qStart">
+<option value="">Select time</option>
+<option value="08:00">8:00 AM</option>
+<option value="08:30">8:30 AM</option>
+<option value="09:00">9:00 AM</option>
+<option value="09:30">9:30 AM</option>
+<option value="10:00">10:00 AM</option>
+<option value="10:30">10:30 AM</option>
+<option value="11:00">11:00 AM</option>
+<option value="11:30">11:30 AM</option>
+<option value="12:00">12:00 PM</option>
+<option value="12:30">12:30 PM</option>
+<option value="13:00">1:00 PM</option>
+<option value="13:30">1:30 PM</option>
+<option value="14:00">2:00 PM</option>
+<option value="14:30">2:30 PM</option>
+<option value="15:00">3:00 PM</option>
+<option value="15:30">3:30 PM</option>
+<option value="16:00">4:00 PM</option>
+<option value="16:30">4:30 PM</option>
+<option value="17:00">5:00 PM</option>
+<option value="17:30">5:30 PM</option>
+<option value="18:00">6:00 PM</option>
+<option value="18:30">6:30 PM</option>
+<option value="19:00">7:00 PM</option>
+<option value="19:30">7:30 PM</option>
+<option value="20:00">8:00 PM</option>
+<option value="20:30">8:30 PM</option>
+<option value="21:00">9:00 PM</option>
+<option value="21:30">9:30 PM</option>
+<option value="22:00">10:00 PM</option>
+<option value="22:30">10:30 PM</option>
+<option value="23:00">11:00 PM</option>
+<option value="23:30">11:30 PM</option>
+</select>
+    </label>
+    <label>To
+      <select id="qEnd">
+<option value="">Select time</option>
+<option value="08:30">8:30 AM</option>
+<option value="09:00">9:00 AM</option>
+<option value="09:30">9:30 AM</option>
+<option value="10:00">10:00 AM</option>
+<option value="10:30">10:30 AM</option>
+<option value="11:00">11:00 AM</option>
+<option value="11:30">11:30 AM</option>
+<option value="12:00">12:00 PM</option>
+<option value="12:30">12:30 PM</option>
+<option value="13:00">1:00 PM</option>
+<option value="13:30">1:30 PM</option>
+<option value="14:00">2:00 PM</option>
+<option value="14:30">2:30 PM</option>
+<option value="15:00">3:00 PM</option>
+<option value="15:30">3:30 PM</option>
+<option value="16:00">4:00 PM</option>
+<option value="16:30">4:30 PM</option>
+<option value="17:00">5:00 PM</option>
+<option value="17:30">5:30 PM</option>
+<option value="18:00">6:00 PM</option>
+<option value="18:30">6:30 PM</option>
+<option value="19:00">7:00 PM</option>
+<option value="19:30">7:30 PM</option>
+<option value="20:00">8:00 PM</option>
+<option value="20:30">8:30 PM</option>
+<option value="21:00">9:00 PM</option>
+<option value="21:30">9:30 PM</option>
+<option value="22:00">10:00 PM</option>
+<option value="22:30">10:30 PM</option>
+<option value="23:00">11:00 PM</option>
+<option value="23:30">11:30 PM</option>
+<option value="24:00">12:00 AM (midnight)</option>
+</select>
+    </label>
+    <label>Guests<input id="qGuests" type="number"></label>
+    <label style="grid-column:span 3">Editable message<textarea id="qText"></textarea></label>
+  </div>
+  <div class="toolbar">
+    <button id="generateMessage">Use default message</button>
+    <button id="sendNext" class="primary">Prepare / open text</button>
+    <button id="copySmsMessage" type="button">Copy message</button>
+    <button id="copySmsPhone" type="button">Copy phone</button>
+    <button id="skipNext">Skip vendor</button>
+    <button id="closeInquiry">Close</button>
+  </div>
+  <div id="currentRecipient" class="card" style="margin-top:10px"></div>
+  <div id="smsStatus" class="sms-status info hidden" aria-live="polite"></div>
+  <div class="sms-help">iPhone/iPad: the recipient opens in Messages and the message is copied for pasting. Mac: the message is copied without launching an unreliable browser SMS link; use Copy phone and paste both into Messages. Android: the text app opens with the message prepared.</div>
+  <div id="queueList" class="note"></div>
+</section>
+
+<div style="display:flex;justify-content:space-between;align-items:center;margin-top:18px">
+  <h2 style="margin:0">Vendor directory</h2>
+  <span id="resultCount" class="note"></span>
+</div>
+<div id="vendorGrid" class="grid"></div>
+</div>
+</div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
