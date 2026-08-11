@@ -497,8 +497,7 @@ function auditRecordDisplay(row){
 
   if(row.module === 'availability'){
     const vendor = vendors.find(v => String(v.id) === String(data.vendor_id));
-    const yacht = yachts.find(y => String(y.id) === String(data.yacht_id));
-
+const yacht = (vendor?.yachts || []).find(y => String(y.id) === String(data.yacht_id));
     const vendorName = vendor?.name || '';
     const yachtName = yacht?.name || '';
 
