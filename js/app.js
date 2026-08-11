@@ -496,15 +496,50 @@ function auditRecordDisplay(row){
   const data = row.new_value || row.old_value || {};
 
   if(row.module === 'availability'){
-    const date = data.availability_date || '';
-    const start = data.start_time || '';
-    const end = data.end_time || '';
+    const vendor = vendors.find(v => String(v.id) === String(data.vendor_id));
+    const yacht = yachts.find(y => String(y.id) === String(data.yacht_id));
+
+    const vendorName = vendor?.name || '';
+    const yachtName = yacht?.name || '';
+
+    let dateText = data.availability_date || '';
+    if(dateText){
+      const d = new Date(`${dateText}T00:00:00`);
+      if(!Number.isNaN(d.getTime())){
+        dateText = d.toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric'
+        });
+      }
+    }
+
+    function auditTime(value){
+      if(!value) return '';
+      const [h, m] = String(value).split(':').map(Number);
+      if(Number.isNaN(h)) return value;
+
+      const suffix = h >= 12 ? 'PM' : 'AM';
+      const hour = h % 12 || 12;
+      return `${hour}:${String(m || 0).padStart(2,'0')} ${suffix}`;
+    }
+
+    const start = auditTime(data.start_time);
+    const end = auditTime(data.end_time);
+    const timeText = start && end ? `${start}–${end}` : start || end;
     const status = data.status || '';
 
-    const parts = [date, start && end ? `${start}–${end}` : start || end, status]
-      .filter(Boolean);
+    const parts = [
+      vendorName,
+      yachtName,
+      dateText,
+      timeText,
+      status
+    ].filter(Boolean);
 
-    return parts.length ? `Availability — ${parts.join(' — ')}` : (row.record_name || row.record_id || 'Availability');
+    return parts.length
+      ? parts.join(' • ')
+      : (row.record_name || row.record_id || 'Availability');
   }
 
   return row.record_name || row.record_id || 'Record';
