@@ -52,6 +52,7 @@
   <button id="showAvailabilityDashboard" class="view-tab" type="button">Availability</button>
   <button id="showBookingDashboard" class="view-tab" type="button">Bookings</button>
   <button id="showNotificationsDashboard" class="view-tab" type="button">Notifications <span id="notificationCountBadge" class="notification-tab-badge zero">0</span></button>
+  <button id="showAuditDashboard" class="view-tab" type="button">Audit Log</button>
 </div>
 
 <section id="availabilityDashboardView" class="availability-shell dashboard-view hidden">
@@ -583,6 +584,58 @@
   </section>
 </section>
 
+
+
+<section id="auditDashboardView" class="dashboard-view hidden">
+  <section class="card">
+    <div class="section-head">
+      <div>
+        <h2>Audit Log</h2>
+        <p>Company activity history showing who changed vendors, yachts, availability, bookings, and team roles.</p>
+      </div>
+      <button id="refreshAuditLog" type="button">Refresh audit log</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="filter-grid audit-filter-grid">
+      <label>Search
+        <input id="auditSearch" placeholder="User, record, action, module">
+      </label>
+      <label>Module
+        <select id="auditModuleFilter">
+          <option value="">All modules</option>
+          <option value="vendors">Vendors</option>
+          <option value="yachts">Yachts</option>
+          <option value="availability">Availability</option>
+          <option value="bookings">Bookings</option>
+          <option value="user_profiles">Team roles</option>
+        </select>
+      </label>
+      <label>Action
+        <select id="auditActionFilter">
+          <option value="">All actions</option>
+          <option value="INSERT">Created</option>
+          <option value="UPDATE">Updated</option>
+          <option value="DELETE">Deleted</option>
+        </select>
+      </label>
+      <label>Time
+        <select id="auditTimeFilter">
+          <option value="all">All time</option>
+          <option value="today">Today</option>
+          <option value="7">Last 7 days</option>
+          <option value="30">Last 30 days</option>
+        </select>
+      </label>
+    </div>
+  </section>
+
+  <section class="card">
+    <div id="auditSummary" class="note">No audit activity loaded yet.</div>
+    <div id="auditLogList" class="audit-list"></div>
+  </section>
+</section>
 
 <section id="notificationsDashboardView" class="notification-shell dashboard-view hidden">
   <section class="card">

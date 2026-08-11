@@ -493,55 +493,7 @@ function auditActionLabel(action){
   return {INSERT:'Created',UPDATE:'Updated',DELETE:'Deleted'}[action]||action||'Changed';
 }
 function auditRecordDisplay(row){
-  const data = row.new_value || row.old_value || {};
-
-  if(row.module === 'availability'){
-    const vendor = vendors.find(v => String(v.id) === String(data.vendor_id));
-const yacht = (vendor?.yachts || []).find(y => String(y.id) === String(data.yacht_id));
-    const vendorName = vendor?.name || '';
-    const yachtName = yacht?.name || '';
-
-    let dateText = data.availability_date || '';
-    if(dateText){
-      const d = new Date(`${dateText}T00:00:00`);
-      if(!Number.isNaN(d.getTime())){
-        dateText = d.toLocaleDateString('en-US', {
-          month: 'short',
-          day: 'numeric',
-          year: 'numeric'
-        });
-      }
-    }
-
-    function auditTime(value){
-      if(!value) return '';
-      const [h, m] = String(value).split(':').map(Number);
-      if(Number.isNaN(h)) return value;
-
-      const suffix = h >= 12 ? 'PM' : 'AM';
-      const hour = h % 12 || 12;
-      return `${hour}:${String(m || 0).padStart(2,'0')} ${suffix}`;
-    }
-
-    const start = auditTime(data.start_time);
-    const end = auditTime(data.end_time);
-    const timeText = start && end ? `${start}–${end}` : start || end;
-    const status = data.status || '';
-
-    const parts = [
-      vendorName,
-      yachtName,
-      dateText,
-      timeText,
-      status
-    ].filter(Boolean);
-
-    return parts.length
-      ? parts.join(' • ')
-      : (row.record_name || row.record_id || 'Availability');
-  }
-
-  return row.record_name || row.record_id || 'Record';
+  return row.record_name||row.record_id||'Record';
 }
 function auditChangedFields(oldValue,newValue){
   if(!oldValue||!newValue)return '';
@@ -851,17 +803,6 @@ async function uploadAllAvailabilityToCloud(){
 
 
 async function runCloudAutoSync(){
-  const active = document.activeElement;
-if (
-  active &&
-  (
-    active.tagName === 'INPUT' ||
-    active.tagName === 'TEXTAREA' ||
-    active.tagName === 'SELECT' ||
-    active.isContentEditable
-  )
-) return;
-if (document.querySelector('details.booking-card[open]')) return;
   if(!cloudUser||cloudAutoSyncBusy||document.hidden)return;
   cloudAutoSyncBusy=true;
   try{
