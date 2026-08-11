@@ -861,6 +861,7 @@ if (
     active.isContentEditable
   )
 ) return;
+if (document.querySelector('details.booking-card[open]')) return;
   if(!cloudUser||cloudAutoSyncBusy||document.hidden)return;
   cloudAutoSyncBusy=true;
   try{
