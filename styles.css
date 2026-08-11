@@ -357,4 +357,81 @@ input[type="file"]{padding:8px;background:#fbfcfe}
   border-radius:9px;
   background:#f8fafc;
   line-height:1.45;
+}/* Vendor card operational two-column layout */
+.vendor-card{
+  display:grid;
+  grid-template-columns:minmax(0, 1fr) minmax(0, 1fr);
+  column-gap:14px;
+  row-gap:10px;
+  align-items:start;
+}
+
+/* Vendor / yacht header stays full width */
+.vendor-card > .vendor-top{
+  grid-column:1 / -1;
+  margin-bottom:2px;
+}
+
+/* Captain / boarding information on the left */
+.vendor-card > .note{
+  grid-column:1;
+  margin:0;
+  height:100%;
+  box-sizing:border-box;
+}
+
+/* Reliability information uses the right side */
+.vendor-card > .reliability-card{
+  grid-column:2;
+  margin:0;
+  height:100%;
+  box-sizing:border-box;
+}
+
+/* Yacht notes and vendor notes remain readable */
+.vendor-card > .note:nth-of-type(n+2){
+  grid-column:1 / -1;
+  height:auto;
+}
+
+/* Contact information and actions use full card width */
+.vendor-card > .foot{
+  grid-column:1 / -1;
+  display:grid;
+  grid-template-columns:minmax(150px, .8fr) minmax(0, 1.4fr);
+  gap:10px;
+  align-items:center;
+  margin-top:2px;
+  padding-top:10px;
+  border-top:1px solid #e5eaf0;
+}
+
+.vendor-card > .foot .actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:7px;
+  margin:0;
+}
+
+.vendor-card > .foot .actions .editVendor{
+  grid-column:1 / -1;
+}
+
+/* Keep cards usable on narrower screens */
+@media (max-width:900px){
+  .vendor-card{
+    grid-template-columns:1fr;
+  }
+
+  .vendor-card > .vendor-top,
+  .vendor-card > .note,
+  .vendor-card > .reliability-card,
+  .vendor-card > .foot,
+  .vendor-card > .note:nth-of-type(n+2){
+    grid-column:1;
+  }
+
+  .vendor-card > .foot{
+    grid-template-columns:1fr;
+  }
 }
