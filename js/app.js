@@ -861,8 +861,7 @@ if (
     active.isContentEditable
   )
 ) return;
-if (document.querySelector('details.booking-card[open]')) return;
-  if(!cloudUser||cloudAutoSyncBusy||document.hidden)return;
+if (document.querySelector('details.booking-card[open], details.availability-record[open]')) return;  if(!cloudUser||cloudAutoSyncBusy||document.hidden)return;
   cloudAutoSyncBusy=true;
   try{
     await loadSharedVendors({quiet:true});
