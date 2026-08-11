@@ -851,6 +851,16 @@ async function uploadAllAvailabilityToCloud(){
 
 
 async function runCloudAutoSync(){
+  const active = document.activeElement;
+if (
+  active &&
+  (
+    active.tagName === 'INPUT' ||
+    active.tagName === 'TEXTAREA' ||
+    active.tagName === 'SELECT' ||
+    active.isContentEditable
+  )
+) return;
   if(!cloudUser||cloudAutoSyncBusy||document.hidden)return;
   cloudAutoSyncBusy=true;
   try{
